@@ -178,7 +178,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::getBody()
      */
-    public function getBody(): null|StreamInterface
+    public function getBody(): StreamInterface
     {
         return $this->body;
     }
