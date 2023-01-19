@@ -17,28 +17,118 @@ final class MessageTest extends TestCase
         // Test that the method works with the valid values as strings
         foreach (Message::SUPPORTED_PROTOCOL_VERSIONS as $version) {
             $newMessage = $this->message->withProtocolVersion($version);
-            $this->assertEquals($version, $newMessage->getProtocolVersion());
             $this->assertEquals(Message::DEFAULT_PROTOCOL_VERSION, $this->message->getProtocolVersion());
+            $this->assertEquals($version, $newMessage->getProtocolVersion());
         }
 
-        // Test that the method works with the valid values as doubles
-        foreach (Message::SUPPORTED_PROTOCOL_VERSIONS as $version) {
-            $newMessage = $this->message->withProtocolVersion(floatval($version));
-            $this->assertEquals($version, $newMessage->getProtocolVersion());
-            $this->assertEquals(Message::DEFAULT_PROTOCOL_VERSION, $this->message->getProtocolVersion());
-        }
+        // Test that the method will throw an exception if we give it a non-string value
+        $this->expectException(\InvalidArgumentException::class);
+        $this->message->withProtocolVersion(0.1);
 
         // Test that the method will throw an exception if we give it an invalid string value
         $this->expectException(\UnexpectedValueException::class);
         $this->message->withProtocolVersion("0.1");
+    }
 
-        // Test that the method will throw an exception if we give it an invalid double value
-        $this->expectException(\UnexpectedValueException::class);
-        $this->message->withProtocolVersion(0.2);
+    public function testWithHeader(): void
+    {
+        $headerName1    = "Name1";
+        $headerValue1   = "A";
 
-        // Test that the method will throw an error if we give it an
-        // argument with a type that can not be converted to a double
-        $this->expectError();
-        $this->message->withProtocolVersion([]);
+        $headerName2    = "Name2";
+        $headerValue2   = ["B"];
+        $headerValue3   = ["C", "D"];
+
+        // Test that the method works when inserting a string value
+        $newMessage = $this->message->withHeader($headerName1, $headerValue1);
+        $this->assertFalse($this->message->hasHeader($headerName1));
+        $this->assertEquals([$headerValue1], $newMessage->getHeader($headerName1));
+
+        // Test that the method works when inserting an array value
+        $newMessage = $this->message->withHeader($headerName2, $headerValue2);
+        $this->assertFalse($this->message->hasHeader($headerName2));
+        $this->assertEquals($headerValue2, $newMessage->getHeader($headerName2));
+
+        // Test that the method overwrites existing headers for the new message but not the old message
+        $newMessage2 = $newMessage->withHeader($headerName2, $headerValue3);
+        $this->assertEquals($headerValue2, $newMessage->getHeader($headerName2));
+        $this->assertEquals($headerValue3, $newMessage2->getHeader($headerName2));
+
+        // Test that the method will throw an exception if the argument 'name' is not a string
+        $this->expectException(\InvalidArgumentException::class);
+        $this->message->withHeader(1, "value");
+
+        // Test that the method will throw an exception if the argument 'value' is not a string or string[]
+        $this->expectException(\InvalidArgumentException::class);
+        $this->message->withHeader("name", 1);
+    }
+
+    public function testWithAddedHeader(): void
+    {
+        $headerName1    = "Name1";
+        $headerValue1   = "A";
+
+        $headerName2    = "Name2";
+        $headerValue2   = ["B"];
+        $headerValue3   = ["C", "D"];
+
+        // Test that the method works when inserting a string value for a header name that does not yet exist
+        $newMessage = $this->message->withAddedHeader($headerName1, $headerValue1);
+        $this->assertFalse($this->message->hasHeader($headerName1));
+        $this->assertEquals([$headerValue1], $newMessage->getHeader($headerName1));
+
+        // Test that the method works when inserting an array value for a header name that does not yet exist
+        $newMessage = $this->message->withAddedHeader($headerName2, $headerValue2);
+        $this->assertFalse($this->message->hasHeader($headerName2));
+        $this->assertEquals($headerValue2, $newMessage->getHeader($headerName2));
+
+        // Test that the method works when inserting a value for a header that already exists
+        $newMessage2 = $newMessage->withAddedHeader($headerName2, $headerValue3);
+        $this->assertEquals($headerValue2, $newMessage->getHeader($headerName2));
+        foreach ($headerValue2 as $value) {
+            $this->assertContains($value, $newMessage2->getHeader($headerName2));
+        }
+        foreach ($headerValue3 as $value) {
+            $this->assertContains($value, $newMessage2->getHeader($headerName2));
+        }
+
+        // Test that the method will throw an exception if the argument 'name' is not a string
+        $this->expectException(\InvalidArgumentException::class);
+        $this->message->withHeader(1, "value");
+
+        // Test that the method will throw an exception if the argument 'value' is not a string or string[]
+        $this->expectException(\InvalidArgumentException::class);
+        $this->message->withHeader("name", 1);
+    }
+
+    public function testWithoutHeader(): void
+    {
+        // Test the general operation of the method
+        $newMessage = $this->message->withHeader("header", "value");
+        $newMessage2 = $newMessage->withoutHeader("header");
+        $this->assertTrue($newMessage->hasHeader("header"));
+        $this->assertFalse($newMessage2->hasHeader("header"));
+
+        // Try removing a header that doesn't exist just to ensure we don't throw
+        $this->message->withoutHeader("header");
+
+        // Test that the method will throw an exception if the argument 'name' is not a string
+        $this->expectException(\InvalidArgumentException::class);
+        $this->message->withoutHeader(1);
+    }
+
+    public function testGetHeaderLine(): void
+    {
+        // Test the general operation of the method
+        $newMessage = $this->message->withHeader("header", ["A", "B", "C"]);
+        $this->assertEquals("A,B,C", $newMessage->getHeaderLine("header"));
+
+        // Test the edge case where we have no header that is an empty array
+        $newMessage = $this->message->withHeader("header", []);
+        $this->assertEquals("", $newMessage->getHeaderLine("header"));
+
+        // Test that the method will throw an exception if the argument 'name' is not a string
+        $this->expectException(\InvalidArgumentException::class);
+        $this->message->withoutHeader(1);
     }
 }
