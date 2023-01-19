@@ -29,8 +29,9 @@ class Message implements MessageInterface
     const DEFAULT_PROTOCOL_VERSION      = "1.1";
     const SUPPORTED_PROTOCOL_VERSIONS   = ["1.0", "1.1"];
 
-    private string $protocolVersion;
-    private array  $headers;
+    private string          $protocolVersion;
+    private array           $headers;
+    private StreamInterface $body;
 
     /**
      * Constructor.
@@ -39,6 +40,7 @@ class Message implements MessageInterface
     {
         $this->protocolVersion  = self::DEFAULT_PROTOCOL_VERSION;
         $this->headers          = [];
+        $this->body             = new NullStream;
     }
 
     /**
@@ -96,7 +98,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::getHeader()
      */
-    public function getHeader($name)
+    public function getHeader($name): array
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException("Argument 'name' must have type string.");
@@ -114,7 +116,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::getHeaderLine()
      */
-    public function getHeaderLine($name)
+    public function getHeaderLine($name): string
     {
         return implode(",", $this->getHeader($name));
     }
@@ -122,7 +124,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withHeader()
      */
-    public function withHeader($name, $value)
+    public function withHeader($name, $value): Message
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException("Argument 'name' must have type string.");
@@ -144,7 +146,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withAddedHeader()
      */
-    public function withAddedHeader($name, $value)
+    public function withAddedHeader($name, $value): Message
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException("Argument 'name' must have type string.");
@@ -168,7 +170,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withoutHeader()
      */
-    public function withoutHeader($name)
+    public function withoutHeader($name): Message
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException("Argument 'name' must have type string.");
@@ -185,9 +187,9 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::getBody()
      */
-    public function getBody()
+    public function getBody(): null|StreamInterface
     {
-        // TODO
+        return $this->body;
     }
 
     /**
@@ -195,7 +197,8 @@ class Message implements MessageInterface
      */
     public function withBody(StreamInterface $body)
     {
-        // TODO
+        $newMessage = clone $this;
+        $newMessage->body = $body;
     }
 
     /**
