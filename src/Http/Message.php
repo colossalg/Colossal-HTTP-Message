@@ -2,27 +2,9 @@
 
 namespace Colossal\Http;
 
+use \Colossal\Utilities\Utilities;
 use \Psr\Http\Message\MessageInterface;
 use \Psr\Http\Message\StreamInterface;
-use \UnexpectedValueException;
-
-function isStringOrArrayOfStrings(mixed $value): bool
-{
-    if (is_string($value)) {
-        return true;
-    }
-
-    if (is_array($value)) {
-        foreach ($value as $val) {
-            if (!is_string($val)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    return false;
-}
 
 class Message implements MessageInterface
 {
@@ -41,6 +23,15 @@ class Message implements MessageInterface
         $this->protocolVersion  = self::DEFAULT_PROTOCOL_VERSION;
         $this->headers          = [];
         $this->body             = new NullStream;
+    }
+
+    /**
+     * Copy constructor.
+     */
+    public function __clone()
+    {
+        $this->headers  = Utilities::arrayClone($this->headers);
+        $this->body     = clone $this->body;
     }
 
     /**
@@ -129,7 +120,7 @@ class Message implements MessageInterface
         if (!is_string($name)) {
             throw new \InvalidArgumentException("Argument 'name' must have type string.");
         }
-        if (!isStringOrArrayOfStrings($value)) {
+        if (!Utilities::isStringOrArrayOfStrings($value)) {
             throw new \InvalidArgumentException("Argument 'value' must have type string or string[].");
         }
 
@@ -151,7 +142,7 @@ class Message implements MessageInterface
         if (!is_string($name)) {
             throw new \InvalidArgumentException("Argument 'name' must have type string.");
         }
-        if (!isStringOrArrayOfStrings($value)) {
+        if (!Utilities::isStringOrArrayOfStrings($value)) {
             throw new \InvalidArgumentException("Argument 'value' must have type string or string[].");
         }
 
@@ -195,10 +186,12 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withBody()
      */
-    public function withBody(StreamInterface $body)
+    public function withBody(StreamInterface $body): Message
     {
         $newMessage = clone $this;
         $newMessage->body = $body;
+
+        return $newMessage;
     }
 
     /**

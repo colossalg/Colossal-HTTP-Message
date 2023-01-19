@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 use Colossal\Http\Message;
+use Colossal\Http\NullStream;
 use PHPUnit\Framework\TestCase;
 
 final class MessageTest extends TestCase
@@ -130,5 +131,12 @@ final class MessageTest extends TestCase
         // Test that the method will throw an exception if the argument 'name' is not a string
         $this->expectException(\InvalidArgumentException::class);
         $this->message->withoutHeader(1);
+    }
+
+    public function testWithBody(): void
+    {
+        // Test the general operation of the method
+        $newMessage = $this->message->withBody(new NullStream);
+        $this->assertFalse($this->message->getBody() === $newMessage->getBody());
     }
 }
