@@ -51,7 +51,7 @@ class Message implements MessageInterface
             throw new \InvalidArgumentException("Argument 'version' must have type string.");
         }
         if (!in_array($version, self::SUPPORTED_PROTOCOL_VERSIONS)) {
-            throw new \UnexpectedValueException("The protocol version $version is not a valid value.");
+            throw new \InvalidArgumentException("The protocol version '$version' is not supported.");
         }
 
         $newMessage = clone $this;
