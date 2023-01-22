@@ -8,8 +8,8 @@ use \Psr\Http\Message\StreamInterface;
 
 class Message implements MessageInterface
 {
-    const DEFAULT_PROTOCOL_VERSION      = "1.1";
-    const SUPPORTED_PROTOCOL_VERSIONS   = ["1.0", "1.1"];
+    public const DEFAULT_PROTOCOL_VERSION      = "1.1";
+    public const SUPPORTED_PROTOCOL_VERSIONS   = ["1.0", "1.1"];
 
     private string          $protocolVersion;
     private array           $headers;
