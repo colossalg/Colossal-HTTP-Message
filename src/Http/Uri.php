@@ -2,17 +2,18 @@
 
 namespace Colossal\Http;
 
+use \Colossal\Utilities\Rfc3986;
 use \Psr\Http\Message\UriInterface;
 
 class Uri implements UriInterface
 {
-    const SUPPORTED_SCHEMES_AND_DEFAULT_PORTS = [
+    public const SUPPORTED_SCHEMES_AND_DEFAULT_PORTS = [
         "http"  => 80,
         "https" => 443
     ];
 
-    const TCP_LOWER_RANGE = 0;
-    const TCP_UPPER_RANGE = 65535;
+    public const TCP_LOWER_RANGE = 0;
+    public const TCP_UPPER_RANGE = 65535;
 
     private string      $scheme;
     private string      $user;
@@ -42,7 +43,7 @@ class Uri implements UriInterface
      */
     public function getScheme(): string
     {
-        return strtolower($this->scheme);
+        return $this->scheme;
     }
 
     /**
@@ -85,7 +86,7 @@ class Uri implements UriInterface
      */
     public function getHost(): string
     {
-        return strtolower($this->host);
+        return $this->host;
     }
 
     /**
@@ -107,7 +108,6 @@ class Uri implements UriInterface
      */
     public function getPath(): string
     {
-        // TODO -- encoding of path before returning
         return $this->path;
     }
 
@@ -116,7 +116,6 @@ class Uri implements UriInterface
      */
     public function getQuery(): string
     {
-        // TODO -- encoding of query before returning
         return $this->query;
     }
 
@@ -125,7 +124,6 @@ class Uri implements UriInterface
      */
     public function getFragment()
     {
-        // TODO -- encoding of fragment before returning
         return $this->fragment;
     }
 
@@ -148,7 +146,7 @@ class Uri implements UriInterface
         }
 
         $newUri = clone $this;
-        $newUri->scheme = $scheme;
+        $newUri->scheme = strtolower($scheme);
 
         return $newUri;
     }
@@ -167,8 +165,8 @@ class Uri implements UriInterface
 
         $newUri = clone $this;
         if ($user !== "") {
-            $newUri->user       = $user;
-            $newUri->password   = !is_null($password) ? $password : "";
+            $newUri->user       = Rfc3986::encodeUserInfo($user);
+            $newUri->password   = !is_null($password) ? Rfc3986::encodeUserInfo($password) : "";
         } else {
             $newUri->user       = "";
             $newUri->password   = "";
@@ -187,7 +185,7 @@ class Uri implements UriInterface
         }
 
         $newUri = clone $this;
-        $newUri->host = $host;
+        $newUri->host = Rfc3986::encodeHost($host);
 
         return $newUri;
     }
@@ -222,10 +220,8 @@ class Uri implements UriInterface
             throw new \InvalidArgumentException("Argument 'path' must have type string.");
         }
 
-        // TODO -- validate path before setting
-
         $newUri = clone $this;
-        $newUri->path = $path;
+        $newUri->path = Rfc3986::encodePath($path);
 
         return $newUri;
     }
@@ -239,10 +235,8 @@ class Uri implements UriInterface
             throw new \InvalidArgumentException("Argument 'query' must have type string.");
         }
 
-        // TODO -- validate query before setting
-
         $newUri = clone $this;
-        $newUri->query = $query;
+        $newUri->query = Rfc3986::encodeQuery($query);
 
         return $newUri;
     }
@@ -256,10 +250,8 @@ class Uri implements UriInterface
             throw new \InvalidArgumentException("Argument 'fragment' must have type string.");
         }
 
-        // TODO -- validate fragment before setting
-
         $newUri = clone $this;
-        $newUri->fragment = $fragment;
+        $newUri->fragment = Rfc3986::encodeFragment($fragment);
 
         return $newUri;
     }
