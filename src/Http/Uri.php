@@ -35,6 +35,7 @@ class Uri implements UriInterface
         $this->host     = "";
         $this->port     = null;
         $this->path     = "";
+        $this->query    = "";
         $this->fragment = "";
     }
 
@@ -261,8 +262,40 @@ class Uri implements UriInterface
      */
     public function __toString(): string
     {
-        // TODO -- combine the various URI components in to URI and return
+        $scheme     = $this->getScheme();
+        $authority  = $this->getAuthority();
+        $path       = $this->getPath();
+        $query      = $this->getQuery();
+        $fragment   = $this->getFragment();
 
-        return "";
+        $uri = "";
+
+        if ($scheme !== "") {
+            $uri = "$scheme:";
+        }
+
+        if ($authority !== "") {
+            $uri = "$uri//$authority";
+        }
+
+        if ($authority !== "") {
+            if ($path !== "" && !str_starts_with($path, "/")) {
+                $path = "/$path";
+            }
+        } else if (str_starts_with($path, "//")) {
+            $rootlessPath = ltrim($path, "/");
+            $path = "/$rootlessPath";
+        }
+        $uri = "$uri$path";
+
+        if ($query !== "") {
+            $uri = "$uri?$query";
+        }
+
+        if ($fragment !== "") {
+            $uri = "$uri#$fragment";
+        }
+
+        return $uri;
     }
 }

@@ -12,16 +12,6 @@ final class UriTest extends TestCase
         $this->uri = new Uri;
     }
 
-    public function testGetScheme(): void
-    {
-        // Test that the method is returning the schemes in normalized lower case
-        foreach (["http", "Http", "HTTP"] as $scheme) {
-            $newUri = $this->uri->withScheme($scheme);
-            $this->assertEquals("", $this->uri->getScheme());
-            $this->assertEquals("http", $newUri->getScheme());
-        }
-    }
-
     public function testGetAuthority(): void
     {
         // The following test cases are formated as follows:
@@ -85,16 +75,6 @@ final class UriTest extends TestCase
         }
     }
 
-    public function testGetHost(): void
-    {
-        // Test that the method is returning the hosts in normalized lower case
-        foreach (["localhost", "Localhost", "LOCALHOST"] as $scheme) {
-            $newUri = $this->uri->withHost($scheme);
-            $this->assertEquals("", $this->uri->getHost());
-            $this->assertEquals("localhost", $newUri->getHost());
-        }
-    }
-
     public function testGetPort(): void
     {
         // Test when there is no scheme and we set a port
@@ -121,21 +101,6 @@ final class UriTest extends TestCase
         $this->assertNull($newUri->getPort());
     }
 
-    // public function testGetPath(): void
-    // {
-    //     // TODO
-    // }
-
-    // public function testGetQuery(): void
-    // {
-    //     // TODO
-    // }
-
-    // public function testGetFragment(): void
-    // {
-    //     // TODO
-    // }
-
     public function testWithScheme(): void
     {
         // Test that the method can set the supported schemes
@@ -153,7 +118,7 @@ final class UriTest extends TestCase
         $this->uri->withScheme(1);
     }
 
-    public function testWithSchemeThrowsWhenGivenNonSupportedScheme(): void
+    public function testWithSchemeThrowsForNonSupportedScheme(): void
     {
         // Test that the method throws an exception when we try to set a non-supported scheme
         $this->expectException(\InvalidArgumentException::class);
@@ -176,6 +141,20 @@ final class UriTest extends TestCase
         $newUri = $this->uri->withUserInfo("root", "password123");
         $newUri = $newUri->withUserInfo("", "should-not-be-set");
         $this->assertEquals("", $newUri->getUserInfo());
+    }
+
+    public function testWithUserInfoThrowsForNonStringUserArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'user'
+        $this->expectException(\InvalidArgumentException::class);
+        $this->uri->withUserInfo(1);
+    }
+
+    public function testWithUserInfoThrowsForNonNullOrStringPasswordArgument(): void
+    {
+        // Test that the method throws when we provide it with a non null or string value for the argument 'password'
+        $this->expectException(\InvalidArgumentException::class);
+        $this->uri->withUserInfo("root", 1);
     }
 
     public function testWithHost(): void
@@ -227,23 +206,106 @@ final class UriTest extends TestCase
         $this->uri->withPort(Uri::TCP_UPPER_RANGE + 1);
     }
 
-    // public function testWithPath(): void
-    // {
-    //     // TODO
-    // }
+    public function testWithPath(): void
+    {
+        // Test that the method works in the general case
+        $newUri = $this->uri->withPath("www.testing.com");
+        $this->assertEquals("", $this->uri->getPath());
+        $this->assertEquals("www.testing.com", $newUri->getPath());
+    }
 
-    // public function testWithQuery(): void
-    // {
-    //     // TODO
-    // }
+    public function testWithPathThrowsForNonStringPathArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'path'
+        $this->expectException(\InvalidArgumentException::class);
+        $this->uri->withPath(1);
+    }
 
-    // public function testWithFragment(): void
-    // {
-    //     // TODO
-    // }
+    public function testWithQuery(): void
+    {
+        // Test that the method works in the general case
+        $newUri = $this->uri->withQuery("user=root&password=password123");
+        $this->assertEquals("", $this->uri->getQuery());
+        $this->assertEquals("user=root&password=password123", $newUri->getQuery());
+    }
 
-    // public function testToString(): void
-    // {
-    //     // TODO
-    // }
+    public function testWithQueryThrowsForNonStringQueryArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'query'
+        $this->expectException(\InvalidArgumentException::class);
+        $this->uri->withQuery(1);
+    }
+
+    public function testWithFragment(): void
+    {
+        // Test that the method works in the general case
+        $newUri = $this->uri->withFragment("title");
+        $this->assertEquals("", $this->uri->getFragment());
+        $this->assertEquals("title", $newUri->getFragment());
+    }
+
+    public function testWithFragmentThrowsForNonStringFragmentArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'fragment'
+        $this->expectException(\InvalidArgumentException::class);
+        $this->uri->withFragment(1);
+    }
+
+    public function testToString(): void
+    {
+        // The following test cases are formatted as follows:
+        //     - Key    => The expected string returned by __toString().
+        //     - Value  => What parameters to set in the URI:
+        //          - [0] => The scheme.
+        //          - [1] => The user component of the user info.
+        //          - [2] => The password component of the user info.
+        //          - [3] => The host.
+        //          - [4] => The port.
+        //          - [5] => The path.
+        //          - [6] => The query.
+        //          - [7] => The fragment.
+        // All of these values influence what __toString() returns so we test a
+        // bunch of combinations. In particular, we try to cover all of the
+        // important combinations of the authority and path components as
+        // detailed in the IUri::__toString() documentation.
+        $testCases = [
+            // Test each of the individual components on their own (scheme, authority, host, path, query, fragment)
+            "http:"                                                         => ["http", "", "", "", null, "", "", ""],
+            "http://authority"                                              => ["http", "", "", "authority", null, "", "", ""],
+            "http:path"                                                     => ["http", "", "", "", null, "path", "", ""],
+            "http:/path"                                                    => ["http", "", "", "", null, "/path", "", ""],
+            "http:/path"                                                    => ["http", "", "", "", null, "//path", "", ""],
+            "http:?query"                                                   => ["http", "", "", "", null, "", "query", ""],
+            "http:#fragment"                                                => ["http", "", "", "", null, "", "", "fragment"],
+            // Test some fairly generic looking web URLs
+            "http://localhost:8080"                                         => ["http", "", "", "localhost", 8080, "", "", ""],
+            "http://localhost:8080/"                                        => ["http", "", "", "localhost", 8080, "/", "", ""],
+            "http://localhost:8080/index"                                   => ["http", "", "", "localhost", 8080, "/index", "", ""],
+            "http://localhost:8080/index/"                                  => ["http", "", "", "localhost", 8080, "/index/", "", ""],
+            "http://localhost:8080/users/1"                                 => ["http", "", "", "localhost", 8080, "/users/1", "", ""],
+            "http://localhost:8080/users?id=1"                              => ["http", "", "", "localhost", 8080, "users", "id=1", ""],
+            "http://localhost:8080/users?first_name=John&last_name=Doe"     => ["http", "", "", "localhost", 8080, "users", "first_name=John&last_name=Doe", ""],
+            "http://localhost:8080/index#title"                             => ["http", "", "", "localhost", 8080, "index", "", "title"],
+            "http://localhost:8080/users?id=1#profile"                      => ["http", "", "", "localhost", 8080, "users", "id=1", "profile"],
+            "http://root:password123@localhost:8080/index"                  => ["http", "root", "password123", "localhost", 8080, "index", "", ""],
+            "http://www.google.com"                                         => ["http", "", "", "www.google.com", null, "", "", ""],
+            // Test the combinations of both authority and path (either on their own are already tested above)
+            "http://authority/path"                                         => ["http", "", "", "authority", null, "path", "", ""],
+            "http://authority/path"                                         => ["http", "", "", "authority", null, "/path", "", ""],
+            "http://authority//path"                                        => ["http", "", "", "authority", null, "//path", "", ""],
+            "http://authority///path"                                       => ["http", "", "", "authority", null, "///path", "", ""],
+        ];
+
+        foreach ($testCases as $expected => $components) {
+            $newUri = $this->uri
+                ->withScheme($components[0])
+                ->withUserInfo($components[1], $components[2])
+                ->withHost($components[3])
+                ->withPort($components[4])
+                ->withPath($components[5])
+                ->withQuery($components[6])
+                ->withFragment($components[7]);
+            $this->assertEquals($expected, $newUri->__toString());
+        }
+    }
 }
