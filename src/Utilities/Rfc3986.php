@@ -45,7 +45,7 @@ class Rfc3986
      */
     public static function encodeScheme(string $scheme): string
     {
-        if (!preg_match("/[a-zA-Z][a-zA-Z0-9\+\-\.]*", $scheme)) {
+        if (!preg_match("/[a-zA-Z][a-zA-Z0-9\+\-\.]*/", $scheme)) {
             throw new \InvalidArgumentException(
                 "Argument 'scheme' must start with a letter and may only contain " .
                 "characters from the following set: { a-z, A-Z, 0-9, +, -, .}.");
@@ -225,7 +225,7 @@ class Rfc3986
      * @param string $str The string to validate.
      * @throws \InvalidArgumentException if any non US-ASCII characters are found within $str.
      */
-    private static function validateIsAscii(string $str): void
+    public static function validateIsAscii(string $str): void
     {
         if (!mb_check_encoding($str, "ASCII")) {
             throw new \InvalidArgumentException("Argument 'str' must contain only US-ASCII characters.");
@@ -240,7 +240,7 @@ class Rfc3986
      * @param string $str The string to validate.
      * @throws \InvalidArgumentException if any invalid percent encodings are found within $str.
      */
-    private static function validatePercentEncoding(string $str): void
+    public static function validatePercentEncoding(string $str): void
     {
         $matches = [];
         if (preg_match("/(%(?![a-fA-F0-9]{2}).{0,2})/", $str, $matches)) {
@@ -256,11 +256,11 @@ class Rfc3986
      * @param string $str The string to check.
      * @return bool Whether $str represents a valid IP literal address.
      */
-    private static function isIPLiteral(string $str): bool
+    public static function isIPLiteral(string $str): bool
     {
         $matches = [];
-        if (preg_match("/\[(.*)\]/", $str, $matches)) {
-            return self::isIPv6Address($matches[0]) || self::isIPvFutureAddress($matches[0]);
+        if (preg_match("/^\[(.*)\]$/", $str, $matches)) {
+            return self::isIPv6Address($matches[1]) || self::isIPvFutureAddress($matches[1]);
         }
 
         return false;
@@ -274,7 +274,7 @@ class Rfc3986
      * @param string $str The string to check.
      * @return bool Whether $str represents a valid IPv6 address.
      */
-    private static function isIPv6Address(string $str): bool
+    public static function isIPv6Address(string $str): bool
     {
         $hexdig = "[a-fA-F0-9]";
         $h16    = "$hexdig{1,4}";
@@ -293,7 +293,7 @@ class Rfc3986
             "(?:(?:$h16:){0,6}$h16)?::"                   .
             ")$/";
 
-        return preg_match($ipv6Pattern, $str);
+        return boolval(preg_match($ipv6Pattern, $str));
     }
 
     /**
@@ -304,10 +304,10 @@ class Rfc3986
      * @param string $str The string to check.
      * @return bool Whether $str represents a valid IPvFuture address.
      */
-    private static function isIPvFutureAddress(string $str): bool
+    public static function isIPvFutureAddress(string $str): bool
     {
-        $ipvFuturePattern = "/^(v[a-fA-F0-9]+\.[a-fA-F0-9\-._~!$&'()*+,;=:]+)$/";
+        $ipvFuturePattern = "/^(v[a-fA-F0-9]+\.[a-zA-Z0-9\-._~!$&'()*+,;=:]+)$/";
 
-        return preg_match($ipvFuturePattern, $str);
+        return boolval(preg_match($ipvFuturePattern, $str));
     }
 }
