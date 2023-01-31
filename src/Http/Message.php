@@ -8,8 +8,8 @@ use \Psr\Http\Message\StreamInterface;
 
 class Message implements MessageInterface
 {
-    const DEFAULT_PROTOCOL_VERSION      = "1.1";
-    const SUPPORTED_PROTOCOL_VERSIONS   = ["1.0", "1.1"];
+    public const DEFAULT_PROTOCOL_VERSION      = "1.1";
+    public const SUPPORTED_PROTOCOL_VERSIONS   = ["1.0", "1.1"];
 
     private string          $protocolVersion;
     private array           $headers;
@@ -51,7 +51,7 @@ class Message implements MessageInterface
             throw new \InvalidArgumentException("Argument 'version' must have type string.");
         }
         if (!in_array($version, self::SUPPORTED_PROTOCOL_VERSIONS)) {
-            throw new \UnexpectedValueException("The protocol version $version is not a valid value.");
+            throw new \InvalidArgumentException("The protocol version '$version' is not supported.");
         }
 
         $newMessage = clone $this;
@@ -178,7 +178,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::getBody()
      */
-    public function getBody(): null|StreamInterface
+    public function getBody(): StreamInterface
     {
         return $this->body;
     }

@@ -21,13 +21,19 @@ final class MessageTest extends TestCase
             $this->assertEquals(Message::DEFAULT_PROTOCOL_VERSION, $this->message->getProtocolVersion());
             $this->assertEquals($version, $newMessage->getProtocolVersion());
         }
+    }
 
-        // Test that the method will throw an exception if we give it a non-string value
+    public function testWithProtocolVersionThrowsForNonStringVersionArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'version'
         $this->expectException(\InvalidArgumentException::class);
-        $this->message->withProtocolVersion(0.1);
+        $this->message->withProtocolVersion(1);
+    }
 
-        // Test that the method will throw an exception if we give it an invalid string value
-        $this->expectException(\UnexpectedValueException::class);
+    public function testWithProtocolVersionThrowsWhenGivenNonSupportedVersion(): void
+    {
+        // Test that the method throws an exception when we try to set a non-supported protocol version
+        $this->expectException(\InvalidArgumentException::class);
         $this->message->withProtocolVersion("0.1");
     }
 
@@ -54,12 +60,18 @@ final class MessageTest extends TestCase
         $newMessage2 = $newMessage->withHeader($headerName2, $headerValue3);
         $this->assertEquals($headerValue2, $newMessage->getHeader($headerName2));
         $this->assertEquals($headerValue3, $newMessage2->getHeader($headerName2));
+    }
 
-        // Test that the method will throw an exception if the argument 'name' is not a string
+    public function testWithHeaderThrowsForNonStringNameArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'name'
         $this->expectException(\InvalidArgumentException::class);
         $this->message->withHeader(1, "value");
+    }
 
-        // Test that the method will throw an exception if the argument 'value' is not a string or string[]
+    public function testWithHeaderThrowsForNonStringOrStringArrayValueArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string or string[] value for the argument 'value'
         $this->expectException(\InvalidArgumentException::class);
         $this->message->withHeader("name", 1);
     }
@@ -92,14 +104,20 @@ final class MessageTest extends TestCase
         foreach ($headerValue3 as $value) {
             $this->assertContains($value, $newMessage2->getHeader($headerName2));
         }
+    }
 
-        // Test that the method will throw an exception if the argument 'name' is not a string
+    public function testWithAddedHeaderThrowsForNonStringNameArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'name'
         $this->expectException(\InvalidArgumentException::class);
-        $this->message->withHeader(1, "value");
+        $this->message->withAddedHeader(1, "value");
+    }
 
-        // Test that the method will throw an exception if the argument 'value' is not a string or string[]
+    public function testWithAddedHeaderThrowsForNonStringOrStringArrayValueArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string or string[] value for the argument 'value'
         $this->expectException(\InvalidArgumentException::class);
-        $this->message->withHeader("name", 1);
+        $this->message->withAddedHeader("name", 1);
     }
 
     public function testWithoutHeader(): void
@@ -112,8 +130,11 @@ final class MessageTest extends TestCase
 
         // Try removing a header that doesn't exist just to ensure we don't throw
         $this->message->withoutHeader("header");
+    }
 
-        // Test that the method will throw an exception if the argument 'name' is not a string
+    public function testWithoutHeaderThrowsForNonStringNameArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'name'
         $this->expectException(\InvalidArgumentException::class);
         $this->message->withoutHeader(1);
     }
@@ -127,10 +148,13 @@ final class MessageTest extends TestCase
         // Test the edge case where we have no header that is an empty array
         $newMessage = $this->message->withHeader("header", []);
         $this->assertEquals("", $newMessage->getHeaderLine("header"));
+    }
 
-        // Test that the method will throw an exception if the argument 'name' is not a string
+    public function testGetHeaderLineThrowsForNonStringNameArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'name'
         $this->expectException(\InvalidArgumentException::class);
-        $this->message->withoutHeader(1);
+        $this->message->getHeaderLine(1);
     }
 
     public function testWithBody(): void
