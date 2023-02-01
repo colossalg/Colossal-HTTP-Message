@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Colossal\Utilities;
 
@@ -9,7 +11,7 @@ class Utilities
      * @param mixed $value The value to check.
      * @return bool Whether $value is a string or an array of strings.
      */
-    static function isStringOrArrayOfStrings(mixed $value): bool
+    public static function isStringOrArrayOfStrings(mixed $value): bool
     {
         if (is_string($value)) {
             return true;

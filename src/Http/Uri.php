@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use \Colossal\Utilities\Rfc3986;
-use \Psr\Http\Message\UriInterface;
+use Colossal\Utilities\Rfc3986;
+use Psr\Http\Message\UriInterface;
 
 class Uri implements UriInterface
 {
@@ -87,7 +89,8 @@ class Uri implements UriInterface
     public function getPort(): null|int
     {
         if ($this->scheme !== "") {
-            if (is_null($this->port) || self::SUPPORTED_SCHEMES_AND_DEFAULT_PORTS[strtolower($this->scheme)] === $this->port) {
+            $defaultPortForScheme = self::SUPPORTED_SCHEMES_AND_DEFAULT_PORTS[strtolower($this->scheme)];
+            if (is_null($this->port) || $this->port === $defaultPortForScheme) {
                 return null;
             }
         }
@@ -193,7 +196,8 @@ class Uri implements UriInterface
         if (!is_null($port)) {
             if ($port < self::TCP_LOWER_RANGE || self::TCP_UPPER_RANGE < $port) {
                 throw new \InvalidArgumentException(
-                    "Argument 'port' must be in range [" . self::TCP_LOWER_RANGE . ", " . self::TCP_UPPER_RANGE . "].");
+                    "Argument 'port' must be in range [" . self::TCP_LOWER_RANGE . ", " . self::TCP_UPPER_RANGE . "]."
+                );
             }
         }
 
@@ -273,7 +277,7 @@ class Uri implements UriInterface
             if ($path !== "" && !str_starts_with($path, "/")) {
                 $path = "/$path";
             }
-        } else if (str_starts_with($path, "//")) {
+        } elseif (str_starts_with($path, "//")) {
             $rootlessPath = ltrim($path, "/");
             $path = "/$rootlessPath";
         }

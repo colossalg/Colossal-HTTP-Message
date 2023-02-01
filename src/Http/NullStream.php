@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use \Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * @codeCoverageIgnore
@@ -20,7 +22,9 @@ class NullStream implements StreamInterface
     /**
      * @see StreamInterface::close()
      */
-    public function close(): void {}
+    public function close(): void
+    {
+    }
 
     /**
      * @see StreamInterface::detach()
