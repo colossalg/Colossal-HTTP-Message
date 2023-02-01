@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use \Colossal\Utilities\Rfc3986;
-use \Psr\Http\Message\UriInterface;
+use Colossal\Utilities\Rfc3986;
+use Psr\Http\Message\UriInterface;
 
 class Uri implements UriInterface
 {
@@ -14,15 +16,6 @@ class Uri implements UriInterface
 
     public const TCP_LOWER_RANGE = 0;
     public const TCP_UPPER_RANGE = 65535;
-
-    private string      $scheme;
-    private string      $user;
-    private string      $password;
-    private string      $host;
-    private null|int    $port;
-    private string      $path;
-    private string      $query;
-    private string      $fragment;
 
     /**
      * Constructor.
@@ -96,7 +89,8 @@ class Uri implements UriInterface
     public function getPort(): null|int
     {
         if ($this->scheme !== "") {
-            if (is_null($this->port) || self::SUPPORTED_SCHEMES_AND_DEFAULT_PORTS[strtolower($this->scheme)] === $this->port) {
+            $defaultPortForScheme = self::SUPPORTED_SCHEMES_AND_DEFAULT_PORTS[strtolower($this->scheme)];
+            if (is_null($this->port) || $this->port === $defaultPortForScheme) {
                 return null;
             }
         }
@@ -202,7 +196,8 @@ class Uri implements UriInterface
         if (!is_null($port)) {
             if ($port < self::TCP_LOWER_RANGE || self::TCP_UPPER_RANGE < $port) {
                 throw new \InvalidArgumentException(
-                    "Argument 'port' must be in range [" . self::TCP_LOWER_RANGE . ", " . self::TCP_UPPER_RANGE . "].");
+                    "Argument 'port' must be in range [" . self::TCP_LOWER_RANGE . ", " . self::TCP_UPPER_RANGE . "]."
+                );
             }
         }
 
@@ -282,7 +277,7 @@ class Uri implements UriInterface
             if ($path !== "" && !str_starts_with($path, "/")) {
                 $path = "/$path";
             }
-        } else if (str_starts_with($path, "//")) {
+        } elseif (str_starts_with($path, "//")) {
             $rootlessPath = ltrim($path, "/");
             $path = "/$rootlessPath";
         }
@@ -298,4 +293,44 @@ class Uri implements UriInterface
 
         return $uri;
     }
+
+    /**
+     * @var string The scheme component of the URI (encoded as per RFC 3986).
+     */
+    private string $scheme;
+
+    /**
+     * @var string The user, forming part of the user info component of the URI (encoded as per RFC 3986).
+     */
+    private string $user;
+
+    /**
+     * @var string The password, forming part of the user info component of the URI (encoded as per RFC 3986).
+     */
+    private string $password;
+
+    /**
+     * @var string The host, forming part of the authority component of the URI (encoded as per RFC3986).
+     */
+    private string $host;
+
+    /**
+     * @var null|int The port, forming part of the authority component of the URI (encoded as per RFC3986).
+     */
+    private null|int $port;
+
+    /**
+     * @var string The path component of the URI (encoded as per RFC3986).
+     */
+    private string $path;
+
+    /**
+     * @var string The query component of the URI (encoded as per RFC3986).
+     */
+    private string $query;
+
+    /**
+     * @var string The fragment component of the URI (encoded as per RFC3986).
+     */
+    private string $fragment;
 }

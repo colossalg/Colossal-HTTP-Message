@@ -1,4 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
+namespace Colossal\Utilities\Testing;
 
 use Colossal\Utilities\Rfc3986;
 use PHPUnit\Framework\TestCase;
@@ -81,8 +85,7 @@ final class Rfc3986Test extends TestCase
     public function testEncodeForIndividualReservedCharacters(): void
     {
         // Test that the method correcly encodes all the individual reserved characters
-        foreach (array_merge(Rfc3986::GEN_DELIMS, Rfc3986::SUB_DELIMS) as $reservedChar)
-        {
+        foreach (array_merge(Rfc3986::GEN_DELIMS, Rfc3986::SUB_DELIMS) as $reservedChar) {
             $expected = "%" . strtoupper(bin2hex($reservedChar));
             $this->assertEquals($expected, Rfc3986::encode($reservedChar));
         }
