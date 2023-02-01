@@ -4,6 +4,10 @@ use Colossal\Http\Message;
 use Colossal\Http\NullStream;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \Colossal\Http\Message
+ * @uses \Colossal\Utilities\Utilities
+ */
 final class MessageTest extends TestCase
 {
     private Message $message;
@@ -35,6 +39,55 @@ final class MessageTest extends TestCase
         // Test that the method throws an exception when we try to set a non-supported protocol version
         $this->expectException(\InvalidArgumentException::class);
         $this->message->withProtocolVersion("0.1");
+    }
+
+    public function testGetHeaders(): void
+    {
+        // Test that the method works in some general cases
+        $newMessage = $this->message
+            ->withHeader("header1", "value1")
+            ->withHeader("header2", ["value2", "value3"]);
+        $expected   = [
+            "header1"   => ["value1"],
+            "header2"   => ["value2", "value3"]
+        ];
+        $this->assertEquals($expected, $newMessage->getHeaders());
+    }
+
+    public function testHasHeader(): void
+    {
+        // Test that the method works in some general cases
+        $newMessage = $this->message
+            ->withHeader("header1", "value1")
+            ->withHeader("header2", ["value2", "value3"]);
+        $this->assertTrue($newMessage->hasHeader("header1"));
+        $this->assertTrue($newMessage->hasHeader("header2"));
+        $this->assertFalse($newMessage->hasHeader("header3"));
+    }
+
+    public function testHasHeaderThrowsForNonStringNameArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'name'
+        $this->expectException(\InvalidArgumentException::class);
+        $this->message->hasHeader(1);
+    }
+
+    public function testGetHeader(): void
+    {
+        // Test that the method works in some general cases
+        $newMessage = $this->message
+            ->withHeader("header1", "value1")
+            ->withHeader("header2", ["value2", "value3"]);
+        $this->assertEquals(["value1"], $newMessage->getHeader("header1"));
+        $this->assertEquals(["value2", "value3"], $newMessage->getHeader("header2"));
+        $this->assertEquals([], $newMessage->getHeader("header3"));
+    }
+
+    public function testGetHeaderThrowsForNonStringNameArgument(): void
+    {
+        // Test that the method throws when we provide it with a non string value for the argument 'name'
+        $this->expectException(\InvalidArgumentException::class);
+        $this->message->getHeader(1);
     }
 
     public function testWithHeader(): void

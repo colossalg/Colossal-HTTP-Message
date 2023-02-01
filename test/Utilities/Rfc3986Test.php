@@ -3,8 +3,25 @@
 use Colossal\Utilities\Rfc3986;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \Colossal\Utilities\Rfc3986
+ */
 final class Rfc3986Test extends TestCase
 {
+    public function testEncodeScheme(): void
+    {
+        // Test that the method works in some general cases
+        $testCases = [
+            "http"  => "http",
+            "Http"  => "http",
+            "HTTP"  => "http"
+        ];
+
+        foreach ($testCases as $testCase => $expected) {
+            $this->assertEquals($expected, Rfc3986::encodeScheme($testCase));
+        }
+    }
+
     public function testEncodeSchemeThrowsForInvalidArgumentScheme(): void
     {
         // Test that the method throws if we pass it a value of the incorrect format for the argument 'scheme'

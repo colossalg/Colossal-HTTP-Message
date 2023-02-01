@@ -67,6 +67,8 @@ class Rfc3986
      * @throws \InvalidArgumentException If:
      *      - Any non US-ASCII characters are found within $userInfo.
      *      - Any invalid percent encoded characters are found within $userInfo.
+     *
+     * @codeCoverageIgnore - Covered by tests for encode.
      */
     public static function encodeUserInfo(string $userInfo): string
     {
@@ -89,6 +91,8 @@ class Rfc3986
      * @throws \InvalidArgumentException If:
      *      - Any non US-ASCII characters are found within $host.
      *      - Any invalid percent encoded characters are found within $host.
+     *
+     * @codeCoverageIgnore - Covered by tests for encode and isIPLiteral.
      */
     public static function encodeHost(string $host): string
     {
@@ -115,6 +119,8 @@ class Rfc3986
      * @throws \InvalidArgumentException If:
      *      - Any non US-ASCII characters are found within $path.
      *      - Any invalid percent encoded characters are found within $path.
+     *
+     * @codeCoverageIgnore - Covered by tests for encode.
      */
     public static function encodePath(string $path): string
     {
@@ -137,6 +143,8 @@ class Rfc3986
      * @throws \InvalidArgumentException If:
      *      - Any non US-ASCII characters are found within $query.
      *      - Any invalid percent encoded characters are found within $query.
+     *
+     * @codeCoverageIgnore - Covered by tests for encode.
      */
     public static function encodeQuery(string $query): string
     {
@@ -159,6 +167,8 @@ class Rfc3986
      * @throws \InvalidArgumentException If:
      *      - Any non US-ASCII characters are found within $fragment.
      *      - Any invalid percent encoded characters are found within $fragment.
+     *
+     * @codeCoverageIgnore - Covered by tests for encode.
      */
     public static function encodeFragment(string $fragment): string
     {

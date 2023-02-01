@@ -3,6 +3,10 @@
 use Colossal\Http\Uri;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \Colossal\Http\Uri
+ * @uses \Colossal\Utilities\Rfc3986
+ */
 final class UriTest extends TestCase
 {
     private Uri $uri;
