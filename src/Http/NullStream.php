@@ -4,6 +4,9 @@ namespace Colossal\Http;
 
 use \Psr\Http\Message\StreamInterface;
 
+/**
+ * @codeCoverageIgnore
+ */
 class NullStream implements StreamInterface
 {
     /**
