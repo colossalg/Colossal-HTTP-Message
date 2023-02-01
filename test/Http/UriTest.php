@@ -1,4 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
+namespace Colossal\Http\Testing;
 
 use Colossal\Http\Uri;
 use PHPUnit\Framework\TestCase;
@@ -13,31 +17,12 @@ final class UriTest extends TestCase
 
     public function setUp(): void
     {
-        $this->uri = new Uri;
+        $this->uri = new Uri();
     }
 
     public function testGetAuthority(): void
     {
-        // The following test cases are formated as follows:
-        //     - Key    => The expected string returned by getAuthority().
-        //     - Value  => What parameters to set in the URI:
-        //         - [0] => Whether to set the user info.
-        //         - [1] => Whether to set the host.
-        //         - [2] => Whether to set the port.
-        // The combination of the user info, host and port determines what
-        // getAuthority will return so we test all possible combinations.
-        $testCases = [
-            ""                                  => [false, false, false],
-            ""                                  => [false, false, true ],
-            "localhost"                         => [false, true,  false],
-            "localhost:8080"                    => [false, true,  true ],
-            ""                                  => [true,  false, false],
-            ""                                  => [true,  false, true ],
-            "root:password123@localhost"        => [true,  true,  false],
-            "root:password123@localhost:8080"   => [true,  true,  true ]
-        ];
-
-        foreach ($testCases as $expected => $includes) {
+        $doTestCase = function (string $expected, $includes) {
             $newUri = $this->uri;
             if ($includes[0]) {
                 $newUri = $newUri->withUserInfo("root", "password123");
@@ -50,6 +35,38 @@ final class UriTest extends TestCase
             }
 
             $this->assertEquals($expected, $newUri->getAuthority());
+        };
+
+        // The following test cases are formatted as follows:
+        //     - Key    => The expected string returned by getAuthority().
+        //     - Value  => What parameters to set in the URI:
+        //         - [0] => Whether to set the user info.
+        //         - [1] => Whether to set the host.
+        //         - [2] => Whether to set the port.
+        // The combination of the user info, host and port determines what
+        // getAuthority will return so we test all possible combinations.
+        $testCasesReturningString = [
+            "localhost"                         => [false, true,  false],
+            "localhost:8080"                    => [false, true,  true ],
+            "root:password123@localhost"        => [true,  true,  false],
+            "root:password123@localhost:8080"   => [true,  true,  true ]
+        ];
+
+        foreach ($testCasesReturningString as $expected => $includes) {
+            $doTestCase($expected, $includes);
+        }
+
+        // The following test cases are formatted as above but the expected
+        // value for all is an empty string so the key is omitted.
+        $testCasesReturningEmptyString = [
+            [false, false, false],
+            [false, false, true ],
+            [true,  false, false],
+            [true,  false, true ],
+        ];
+
+        foreach ($testCasesReturningEmptyString as $includes) {
+            $doTestCase("", $includes);
         }
     }
 
@@ -63,7 +80,6 @@ final class UriTest extends TestCase
         // The combination of the user and password determines what getUserInfo
         // will return so we test all possible combinations.
         $testCases = [
-            ""                  => [false, false],
             ""                  => [false, true ],
             "root"              => [true,  false],
             "root:password123"  => [true,  true ]
@@ -119,7 +135,7 @@ final class UriTest extends TestCase
     {
         // Test that the method throws when we provide it with a non string value for the argument 'scheme'
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withScheme(1);
+        $this->uri->withScheme(1); /** @phpstan-ignore-line */
     }
 
     public function testWithSchemeThrowsForNonSupportedScheme(): void
@@ -132,7 +148,7 @@ final class UriTest extends TestCase
     public function testWithUserInfo(): void
     {
         // Test that the method works in the general user / password combinations
-        
+
         $newUri = $this->uri->withUserInfo("root");
         $this->assertEquals("", $this->uri->getUserInfo());
         $this->assertEquals("root", $newUri->getUserInfo());
@@ -151,14 +167,14 @@ final class UriTest extends TestCase
     {
         // Test that the method throws when we provide it with a non string value for the argument 'user'
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withUserInfo(1);
+        $this->uri->withUserInfo(1); /** @phpstan-ignore-line */
     }
 
     public function testWithUserInfoThrowsForNonNullOrStringPasswordArgument(): void
     {
         // Test that the method throws when we provide it with a non null or string value for the argument 'password'
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withUserInfo("root", 1);
+        $this->uri->withUserInfo("root", 1); /** @phpstan-ignore-line */
     }
 
     public function testWithHost(): void
@@ -173,27 +189,26 @@ final class UriTest extends TestCase
     {
         // Test that the method throws when we provide it with a non string value for the argument 'host'
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withHost(1);
+        $this->uri->withHost(1); /** @phpstan-ignore-line */
     }
 
     public function testWithPort(): void
     {
         // Test that the method works in the general cases
-        
+
         $newUri = $this->uri->withPort(1);
         $this->assertEquals(null, $this->uri->getPort());
         $this->assertEquals(1, $newUri->getPort());
 
         $newUri = $newUri->withPort(null);
         $this->assertNull($newUri->getPort());
-
     }
 
     public function testWithPortThrowsForNonIntOrNullPortArgument(): void
     {
         // Test that the method throws when we provide it with a non int or null value for the argument 'port'
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withPort("1");
+        $this->uri->withPort("1"); /** @phpstan-ignore-line */
     }
 
     public function testWithPortThrowsWhenViolatesLowerPortBound(): void
@@ -222,7 +237,7 @@ final class UriTest extends TestCase
     {
         // Test that the method throws when we provide it with a non string value for the argument 'path'
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withPath(1);
+        $this->uri->withPath(1); /** @phpstan-ignore-line */
     }
 
     public function testWithQuery(): void
@@ -237,7 +252,7 @@ final class UriTest extends TestCase
     {
         // Test that the method throws when we provide it with a non string value for the argument 'query'
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withQuery(1);
+        $this->uri->withQuery(1); /** @phpstan-ignore-line */
     }
 
     public function testWithFragment(): void
@@ -252,7 +267,7 @@ final class UriTest extends TestCase
     {
         // Test that the method throws when we provide it with a non string value for the argument 'fragment'
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withFragment(1);
+        $this->uri->withFragment(1); /** @phpstan-ignore-line */
     }
 
     public function testToString(): void
@@ -274,30 +289,35 @@ final class UriTest extends TestCase
         // detailed in the IUri::__toString() documentation.
         $testCases = [
             // Test each of the individual components on their own (scheme, authority, host, path, query, fragment)
-            "http:"                                                         => ["http", "", "", "", null, "", "", ""],
-            "http://authority"                                              => ["http", "", "", "authority", null, "", "", ""],
-            "http:path"                                                     => ["http", "", "", "", null, "path", "", ""],
-            "http:/path"                                                    => ["http", "", "", "", null, "/path", "", ""],
-            "http:/path"                                                    => ["http", "", "", "", null, "//path", "", ""],
-            "http:?query"                                                   => ["http", "", "", "", null, "", "query", ""],
-            "http:#fragment"                                                => ["http", "", "", "", null, "", "", "fragment"],
+            "http:"                         => ["http", "", "", "", null, "", "", ""],
+            "http://authority"              => ["http", "", "", "authority", null, "", "", ""],
+            "http:path"                     => ["http", "", "", "", null, "path", "", ""],
+            "http:/path1"                   => ["http", "", "", "", null, "/path1", "", ""],
+            "http:/path2"                   => ["http", "", "", "", null, "//path2", "", ""],
+            "http:?query"                   => ["http", "", "", "", null, "", "query", ""],
+            "http:#fragment"                => ["http", "", "", "", null, "", "", "fragment"],
             // Test some fairly generic looking web URLs
-            "http://localhost:8080"                                         => ["http", "", "", "localhost", 8080, "", "", ""],
-            "http://localhost:8080/"                                        => ["http", "", "", "localhost", 8080, "/", "", ""],
-            "http://localhost:8080/index"                                   => ["http", "", "", "localhost", 8080, "/index", "", ""],
-            "http://localhost:8080/index/"                                  => ["http", "", "", "localhost", 8080, "/index/", "", ""],
-            "http://localhost:8080/users/1"                                 => ["http", "", "", "localhost", 8080, "/users/1", "", ""],
-            "http://localhost:8080/users?id=1"                              => ["http", "", "", "localhost", 8080, "users", "id=1", ""],
-            "http://localhost:8080/users?first_name=John&last_name=Doe"     => ["http", "", "", "localhost", 8080, "users", "first_name=John&last_name=Doe", ""],
-            "http://localhost:8080/index#title"                             => ["http", "", "", "localhost", 8080, "index", "", "title"],
-            "http://localhost:8080/users?id=1#profile"                      => ["http", "", "", "localhost", 8080, "users", "id=1", "profile"],
-            "http://root:password123@localhost:8080/index"                  => ["http", "root", "password123", "localhost", 8080, "index", "", ""],
-            "http://www.google.com"                                         => ["http", "", "", "www.google.com", null, "", "", ""],
+            "http://localhost:8080"         => ["http", "", "", "localhost", 8080, "", "", ""],
+            "http://localhost:8080/"        => ["http", "", "", "localhost", 8080, "/", "", ""],
+            "http://localhost:8080/index"   => ["http", "", "", "localhost", 8080, "/index", "", ""],
+            "http://localhost:8080/index/"  => ["http", "", "", "localhost", 8080, "/index/", "", ""],
+            "http://localhost:8080/users/1" => ["http", "", "", "localhost", 8080, "/users/1", "", ""],
+            "http://localhost:8080/users?id=1"
+                => ["http", "", "", "localhost", 8080, "users", "id=1", ""],
+            "http://localhost:8080/users?first_name=John&last_name=Doe"
+                => ["http", "", "", "localhost", 8080, "users", "first_name=John&last_name=Doe", ""],
+            "http://localhost:8080/index#title"
+                => ["http", "", "", "localhost", 8080, "index", "", "title"],
+            "http://localhost:8080/users?id=1#profile"
+                => ["http", "", "", "localhost", 8080, "users", "id=1", "profile"],
+            "http://root:password123@localhost:8080/index"
+                => ["http", "root", "password123", "localhost", 8080, "index", "", ""],
+            "http://www.google.com"         => ["http", "", "", "www.google.com", null, "", "", ""],
             // Test the combinations of both authority and path (either on their own are already tested above)
-            "http://authority/path"                                         => ["http", "", "", "authority", null, "path", "", ""],
-            "http://authority/path"                                         => ["http", "", "", "authority", null, "/path", "", ""],
-            "http://authority//path"                                        => ["http", "", "", "authority", null, "//path", "", ""],
-            "http://authority///path"                                       => ["http", "", "", "authority", null, "///path", "", ""],
+            "http://authority/path1"        => ["http", "", "", "authority", null, "path1", "", ""],
+            "http://authority/path2"        => ["http", "", "", "authority", null, "/path2", "", ""],
+            "http://authority//path"        => ["http", "", "", "authority", null, "//path", "", ""],
+            "http://authority///path"       => ["http", "", "", "authority", null, "///path", "", ""],
         ];
 
         foreach ($testCases as $expected => $components) {

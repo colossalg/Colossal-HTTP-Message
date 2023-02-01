@@ -1,4 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
+namespace Colossal\Utilities\Testing;
 
 use Colossal\Utilities\Utilities;
 use PHPUnit\Framework\TestCase;
@@ -11,7 +15,7 @@ final class UtilitiesTest extends TestCase
     public function testIsStringOrArrayOfStrings(): void
     {
         // Test that the method works for some general cases.
-        
+
         $passingTestCases = [
             "string",
             [],
@@ -21,7 +25,7 @@ final class UtilitiesTest extends TestCase
             1,
             1.1,
             ["string1", ["string2", "string3"]],
-            new \stdClass
+            new \stdClass()
         ];
 
         foreach ($passingTestCases as $testCase) {
