@@ -11,10 +11,6 @@ class Message implements MessageInterface
     public const DEFAULT_PROTOCOL_VERSION      = "1.1";
     public const SUPPORTED_PROTOCOL_VERSIONS   = ["1.0", "1.1"];
 
-    private string          $protocolVersion;
-    private array           $headers;
-    private StreamInterface $body;
-
     /**
      * Constructor.
      */
@@ -30,8 +26,7 @@ class Message implements MessageInterface
      */
     public function __clone()
     {
-        $this->headers  = Utilities::arrayClone($this->headers);
-        $this->body     = clone $this->body;
+        $this->body = clone $this->body;
     }
 
     /**
@@ -211,4 +206,19 @@ class Message implements MessageInterface
 
         return $name;
     }
+
+    /**
+     * @var string The protocol version for the message.
+     */
+    private string $protocolVersion;
+
+    /**
+     * @var array<array<string>> The headers for the message.
+     */
+    private array $headers;
+
+    /**
+     * @var StreamInterface The body for the message.
+     */
+    private StreamInterface $body;
 }

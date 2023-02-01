@@ -195,7 +195,7 @@ class Rfc3986
      * percent signs 
      * 
      * @param string $str The string to encode (must consist of US-ASCII characters).
-     * @param array $excludedChars An array of strings representing characters to exclude from encoding.
+     * @param array<string> $excludedChars An array of strings representing characters to exclude from encoding.
      * @return string $str encoded as per RFC 3986.
      * @throws \InvalidArgumentException If:
      *      - Any non US-ASCII characters are found within $str.
@@ -226,6 +226,12 @@ class Rfc3986
             },
             $encoded
         );
+
+        if (is_null($encoded)) {
+            // @codeCoverageIgnoreStart
+            throw new \RuntimeException("An error occurred trying to perform percent encoding for $str.");
+            // @codeCoverageIgnoreEnd
+        }
 
         return $encoded;
     }

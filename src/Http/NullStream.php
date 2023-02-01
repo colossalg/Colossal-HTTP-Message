@@ -65,7 +65,7 @@ class NullStream implements StreamInterface
     /**
      * @see StreamInterface::seek()
      */
-    public function seek($offset, $whence = SEEK_SET)
+    public function seek($offset, $whence = SEEK_SET): void
     {
         throw new \RuntimeException(__METHOD__ . " operation is not supported.");
     }
@@ -73,7 +73,7 @@ class NullStream implements StreamInterface
     /**
      * @see StreamInterface::rewind()
      */
-    public function rewind()
+    public function rewind(): void
     {
         throw new \RuntimeException(__METHOD__ . " operation is not supported.");
     }
