@@ -55,7 +55,7 @@ class NullStream implements StreamInterface
      */
     public function eof(): bool
     {
-        return true;
+        throw new \RuntimeException(__METHOD__ . " operation is not supported.");
     }
 
     /**
