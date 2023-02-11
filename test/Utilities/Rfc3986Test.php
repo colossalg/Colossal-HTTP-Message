@@ -33,6 +33,41 @@ final class Rfc3986Test extends TestCase
         Rfc3986::encodeScheme("1");
     }
 
+    public function testEncodeUserInfo(): void
+    {
+        // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
+        $this->assertEquals("aAzZ09!$&'()*+,;=:%2F%3F%23%5B%5D%40", Rfc3986::encodeUserInfo("aAzZ09!$&'()*+,;=:/?#[]@"));
+    }
+
+    public function testEncodeHost(): void
+    {
+        // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
+        // (String should also be converted to lower case)
+        $this->assertEquals("aazz09!$&'()*+,;=%3A%2F%3F%23%5B%5D%40", Rfc3986::encodeHost("aAzZ09!$&'()*+,;=:/?#[]@"));
+
+        // Test that we do not perform encoding for IPv6 or IPVFuture addresses
+        $this->assertEquals("[1:2:3:4:5:6:7:8]", Rfc3986::encodeHost("[1:2:3:4:5:6:7:8]"));
+        $this->assertEquals("[v7.1:2:3:4]", Rfc3986::encodeHost("[v7.1:2:3:4]"));
+    }
+
+    public function testEncodePath(): void
+    {
+        // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
+        $this->assertEquals("aAzZ09!$&'()*+,;=:/%3F%23%5B%5D@", Rfc3986::encodePath("aAzZ09!$&'()*+,;=:/?#[]@"));
+    }
+
+    public function testEncodeQuery(): void
+    {
+        // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
+        $this->assertEquals("aAzZ09!$&'()*+,;=:/?%23%5B%5D@", Rfc3986::encodeQuery("aAzZ09!$&'()*+,;=:/?#[]@"));
+    }
+
+    public function testEncodeFragment(): void
+    {
+        // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
+        $this->assertEquals("aAzZ09!$&'()*+,;=:/?%23%5B%5D@", Rfc3986::encodeFragment("aAzZ09!$&'()*+,;=:/?#[]@"));
+    }
+
     public function testEncodeWithNoExclusions(): void
     {
         // Test that the method works in some general cases
