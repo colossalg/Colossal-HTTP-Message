@@ -36,7 +36,10 @@ final class Rfc3986Test extends TestCase
     public function testEncodeUserInfo(): void
     {
         // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
-        $this->assertEquals("aAzZ09!$&'()*+,;=:%2F%3F%23%5B%5D%40", Rfc3986::encodeUserInfo("aAzZ09!$&'()*+,;=:/?#[]@"));
+        $this->assertEquals(
+            "aAzZ09!$&'()*+,;=:%2F%3F%23%5B%5D%40",
+            Rfc3986::encodeUserInfo("aAzZ09!$&'()*+,;=:/?#[]@")
+        );
     }
 
     public function testEncodeHost(): void
