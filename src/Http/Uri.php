@@ -125,7 +125,7 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withScheme()
      */
-    public function withScheme($scheme): Uri
+    public function withScheme($scheme): static
     {
         if (!is_string($scheme)) {
             throw new \InvalidArgumentException("Argument 'scheme' must have type string.");
@@ -149,7 +149,7 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withUserInfo()
      */
-    public function withUserInfo($user, $password = null): Uri
+    public function withUserInfo($user, $password = null): static
     {
         if (!is_string($user)) {
             throw new \InvalidArgumentException("Argument 'user' must have type string.");
@@ -173,7 +173,7 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withHost()
      */
-    public function withHost($host): Uri
+    public function withHost($host): static
     {
         if (!is_string($host)) {
             throw new \InvalidArgumentException("Argument 'host' must have type string.");
@@ -188,7 +188,7 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withPort()
      */
-    public function withPort($port): Uri
+    public function withPort($port): static
     {
         if (!is_null($port) && !is_int($port)) {
             throw new \InvalidArgumentException("Argument 'port' must have type null or int.");
@@ -210,7 +210,7 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withPath()
      */
-    public function withPath($path): Uri
+    public function withPath($path): static
     {
         if (!is_string($path)) {
             throw new \InvalidArgumentException("Argument 'path' must have type string.");
@@ -225,7 +225,7 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withQuery()
      */
-    public function withQuery($query): Uri
+    public function withQuery($query): static
     {
         if (!is_string($query)) {
             throw new \InvalidArgumentException("Argument 'query' must have type string.");
@@ -240,7 +240,7 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withFragment()
      */
-    public function withFragment($fragment): Uri
+    public function withFragment($fragment): static
     {
         if (!is_string($fragment)) {
             throw new \InvalidArgumentException("Argument 'fragment' must have type string.");

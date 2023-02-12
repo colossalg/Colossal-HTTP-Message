@@ -42,7 +42,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withProtocolVersion()
      */
-    public function withProtocolVersion($version): Message
+    public function withProtocolVersion($version): static
     {
         if (!is_string($version)) {
             throw new \InvalidArgumentException("Argument 'version' must have type string.");
@@ -112,7 +112,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withHeader()
      */
-    public function withHeader($name, $value): Message
+    public function withHeader($name, $value): static
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException("Argument 'name' must have type string.");
@@ -134,7 +134,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withAddedHeader()
      */
-    public function withAddedHeader($name, $value): Message
+    public function withAddedHeader($name, $value): static
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException("Argument 'name' must have type string.");
@@ -159,7 +159,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withoutHeader()
      */
-    public function withoutHeader($name): Message
+    public function withoutHeader($name): static
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException("Argument 'name' must have type string.");
@@ -184,7 +184,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withBody()
      */
-    public function withBody(StreamInterface $body): Message
+    public function withBody(StreamInterface $body): static
     {
         $newMessage = clone $this;
         $newMessage->body = $body;
