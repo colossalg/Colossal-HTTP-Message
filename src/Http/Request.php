@@ -28,6 +28,8 @@ class Request extends Message implements RequestInterface
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->requestTarget    = "";
         $this->method           = self::DEFAULT_METHOD;
         $this->uri              = new Uri();
@@ -39,6 +41,8 @@ class Request extends Message implements RequestInterface
     public function __clone()
     {
         parent::__clone();
+
+        $this->uri = clone $this->uri;
     }
 
     /**
@@ -48,7 +52,7 @@ class Request extends Message implements RequestInterface
     {
         if ($this->requestTarget === "") {
             $requestTarget = "/";
-            if ($this->getUri()->getPath() !== "") {
+            if ($this->getUri()->getPath()  !== "") {
                 $requestTarget = $this->getUri()->getPath();
             }
             if ($this->getUri()->getQuery() !== "") {
@@ -138,7 +142,8 @@ class Request extends Message implements RequestInterface
         $newRequest = clone $this;
         $newRequest->uri = $uri;
 
-        if ($uri->getHost() !== "" && !($preserveHost && $newRequest->getHeader("Host") !== [])) {
+        $hostHeaderLine = $newRequest->getHeaderLine("host");
+        if ($uri->getHost() !== "" && !($preserveHost && $newRequest->getHeaderLine("host") !== "")) {
             $newRequest = $newRequest->withHeader("Host", $uri->getHost());
         }
 

@@ -186,12 +186,12 @@ class Rfc3986
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.2.3
      *
-     * @param string $port The port component to check.
+     * @param int|string $port The port component to check.
      * @return bool Whether $port represents a valid port component.
      */
-    public static function isValidPort(string $port): bool
+    public static function isValidPort(int|string $port): bool
     {
-        return boolval(preg_match("/^[0-9]*$/", $port));
+        return is_int($port) || boolval(preg_match("/^[0-9]+$/", $port));
     }
 
     /**
@@ -208,7 +208,7 @@ class Rfc3986
     {
         return (
             self::isPercentEncodingValid($path) &&
-            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:@\/]+$/", $path))
+            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:@\/]*$/", $path))
         );
     }
 
@@ -383,9 +383,7 @@ class Rfc3986
         );
 
         if (is_null($encoded)) {
-            // @codeCoverageIgnoreStart
             throw new \RuntimeException("An error occurred trying to perform percent encoding for $str.");
-            // @codeCoverageIgnoreEnd
         }
 
         return $encoded;
@@ -419,7 +417,15 @@ class Rfc3986
         }
     }
 
-    private static function isPercentEncodingValid(string $str): bool
+    /**
+     * Returns whether all percent encodings of a given string are valid as described by RFC 3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-2.1
+     *
+     * @param string $str The string to validate.
+     * @return bool Whether all percent encodings found within $str are valid.
+     */
+    public static function isPercentEncodingValid(string $str): bool
     {
         try {
             self::validatePercentEncoding($str);

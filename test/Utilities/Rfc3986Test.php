@@ -12,6 +12,82 @@ use PHPUnit\Framework\TestCase;
  */
 final class Rfc3986Test extends TestCase
 {
+    public function testParseUriIntoComponents(): void
+    {
+        // The following test cases are formatted as follows:
+        //     - Key    => The uri to be parsed in to its components.
+        //     - Value  => The parsed components of the URI:
+        //          - [0] => The scheme.
+        //          - [1] => The authority.
+        //          - [2] => The path.
+        //          - [3] => The query.
+        //          - [4] => The fragment.
+        $testCases = [
+            // Test each of the individual components on their own (scheme, authority, host, path, query, fragment)
+            "http:"                         => ["http", null, null, null, null],
+            "http://authority"              => ["http", "authority", null, null, null],
+            "http:path"                     => ["http", null, "path", null, null],
+            "http:?query"                   => ["http", null, null, "query", null],
+            "http:#fragment"                => ["http", null, null, null, "fragment"],
+            // Test some fairly generic looking web URLs
+            "http://localhost:8080"         => ["http", "localhost:8080", null, null, null],
+            "http://localhost:8080/"        => ["http", "localhost:8080", "/", null, null],
+            "http://localhost:8080/users"   => ["http", "localhost:8080", "/users", null, null],
+            "http://localhost:8080/users/"  => ["http", "localhost:8080", "/users/", null, null],
+            "http://localhost:8080/users/1" => ["http", "localhost:8080", "/users/1", null, null],
+            "http://localhost:8080/users?first_name=John&last_name=Doe"
+                => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", null],
+            "http://localhost:8080/users?first_name=John&last_name=Doe#profile"
+                => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", "profile"],
+            "http://localhost:8080/users#friends"
+                => ["http", "localhost:8080", "/users", null, "friends"]
+        ];
+
+        foreach ($testCases as $uri => $expectedComponents) {
+            $components = Rfc3986::parseUriIntoComponents($uri);
+            $this->assertEquals($expectedComponents[0], $components["scheme"]);
+            $this->assertEquals($expectedComponents[1], $components["authority"]);
+            $this->assertEquals($expectedComponents[2], $components["path"]);
+            $this->assertEquals($expectedComponents[3], $components["query"]);
+            $this->assertEquals($expectedComponents[4], $components["fragment"]);
+        }
+    }
+
+    public function testIsValidScheme(): void
+    {
+        // Test that the method works in some general cases
+        $testCases = [
+            ""          => false,
+            "http"      => true,
+            "Http"      => false,
+            "HTTP"      => false,
+            // Valid characters in various combinations
+            "a"         => true,
+            "A"         => false,
+            "z"         => true,
+            "Z"         => false,
+            "a0"        => true,
+            "aA"        => false,
+            "+"         => false,
+            "-"         => false,
+            "."         => false,
+            "a+z+0+9+"  => true,
+            "a-z-0-9-"  => true,
+            "a.z.0.9."  => true,
+            "a+z-0.9"   => true,
+            // 'A' followed by an invalid character
+            "a%"        => false,
+            "a:"        => false,
+            "a/"        => false,
+            "a?"        => false,
+            "a#"        => false
+        ];
+
+        foreach ($testCases as $scheme => $isValid) {
+            $this->assertEquals($isValid, Rfc3986::isValidScheme($scheme), "Failed for case '$scheme'.");
+        }
+    }
+
     public function testEncodeScheme(): void
     {
         // Test that the method works in some general cases
@@ -42,6 +118,30 @@ final class Rfc3986Test extends TestCase
         );
     }
 
+    public function testIsValidHost(): void
+    {
+        // Test that the method works in some general cases
+        $testCases = [
+            ""                          => false,
+            "[1:2:3:4:5:6:7:8]"         => true,
+            "[v7.1:2:3:4]"              => true,
+            "localhost"                 => true,
+            // All of the valid characters together
+            "%00azAZ09-._~!$&'()*+,;="  => true,
+            // Invalid characters and percent encodings
+            "?"                         => false,
+            "#"                         => false,
+            "%A"                        => false,
+            "%G"                        => false,
+            "%GA"                       => false,
+            "%AG"                       => false
+        ];
+
+        foreach ($testCases as $host => $isValid) {
+            $this->assertEquals($isValid, Rfc3986::isValidHost($host), "Failed for case '$host'.");
+        }
+    }
+
     public function testEncodeHost(): void
     {
         // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
@@ -53,16 +153,121 @@ final class Rfc3986Test extends TestCase
         $this->assertEquals("[v7.1:2:3:4]", Rfc3986::encodeHost("[v7.1:2:3:4]"));
     }
 
+    public function testIsValidPort(): void
+    {
+        // Test that the method works in some general cases
+        $testCases = [
+            8000    => true,
+            "8080"  => true,
+            "1.1"   => false,
+            "abc"   => false
+        ];
+
+        foreach ($testCases as $port => $isValid) {
+            $this->assertEquals($isValid, Rfc3986::isValidPort($port), "Failed for case '$port'.");
+        }
+    }
+
+    public function testIsValidPath(): void
+    {
+        // Test that the method works in some general cases
+        $testCases = [
+            ""              => true,
+            "%00azAZ09-._~!$&'()*+,;=:@/"   => true,
+            "users"         => true,
+            "users/"        => true,
+            "users/1"       => true,
+            "users/1/"      => true,
+            "users/%AA"     => true,
+            // Arbitrary numbers of consecutive slashes are allowed in the paths
+            "/users/1"      => true,
+            "//users/1"     => true,
+            "///users/1"    => true,
+            "users//1"      => true,
+            // Invalid characters and percent encodings
+            "?"             => false,
+            "#"             => false,
+            "["             => false,
+            "]"             => false,
+            "%A"            => false,
+            "%G"            => false,
+            "%GA"           => false,
+            "%AG"            => false
+        ];
+
+        foreach ($testCases as $path => $isValid) {
+            $this->assertEquals($isValid, Rfc3986::isValidPath($path), "Failed for case '$path'.");
+        }
+    }
+
+    public function testIsValidAbsolutePath(): void
+    {
+        // Test that the method works in some general cases
+        $testCases = [
+            ""              => false,
+            "users/1"       => false,
+            "/users/1"      => true,
+            "//users/1"     => false,
+            "///users/1"    => false
+        ];
+
+        foreach ($testCases as $path => $isValid) {
+            $this->assertEquals($isValid, Rfc3986::isValidAbsolutePath($path), "Failed for case '$path'.");
+        }
+    }
+
     public function testEncodePath(): void
     {
         // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
         $this->assertEquals("aAzZ09!$&'()*+,;=:/%3F%23%5B%5D@", Rfc3986::encodePath("aAzZ09!$&'()*+,;=:/?#[]@"));
     }
 
+    public function testIsValidQuery(): void
+    {
+        // Test that the method works in some general cases
+        $testCases = [
+            "%00azAZ09-._~!$&'()*+,;=:@/?"  => true,
+            "first_name=John&last_name=Doe" => true,
+            // Invalid characters and percent encodings
+            "#"     => false,
+            "["     => false,
+            "]"     => false,
+            "%A"    => false,
+            "%G"    => false,
+            "%GA"   => false,
+            "%AG"   => false
+        ];
+
+        foreach ($testCases as $query => $isValid) {
+            $this->assertEquals($isValid, Rfc3986::isValidQuery($query), "Failed for case '$query'.");
+        }
+    }
+
     public function testEncodeQuery(): void
     {
         // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
         $this->assertEquals("aAzZ09!$&'()*+,;=:/?%23%5B%5D@", Rfc3986::encodeQuery("aAzZ09!$&'()*+,;=:/?#[]@"));
+    }
+
+    public function testIsValidFragment(): void
+    {
+        // Test that the method works in some general cases
+        $testCases = [
+            "%00azAZ09-._~!$&'()*+,;=:@/?"  => true,
+            "index"                         => true,
+            // Invalid characters and percent encodings
+            "#"     => false,
+            "["     => false,
+            "]"     => false,
+            "%A"    => false,
+            "%G"    => false,
+            "%GA"   => false,
+            "%AG"   => false
+        ];
+
+        foreach ($testCases as $fragment => $isValid) {
+            $this->assertEquals($isValid, Rfc3986::isValidFragment($fragment), "Failed for case '$fragment'.");
+        }
     }
 
     public function testEncodeFragment(): void
@@ -177,46 +382,25 @@ final class Rfc3986Test extends TestCase
         Rfc3986::validateIsAscii(utf8_encode("\x5A\x6F\xEB"));
     }
 
-    public function testValidatePercentEncodingPassingCase(): void
+    public function testIsPercentEncodingValid(): void
     {
         // Test the case where the percent encoding is valid
-        $this->expectNotToPerformAssertions();
-        Rfc3986::validatePercentEncoding("%00-testing-%99-testing-%AA-testing-%FF");
-    }
+        $this->assertTrue(Rfc3986::isPercentEncodingValid("%00-testing-%99-testing-%AA-testing-%FF"));
 
-    public function testValidatePercentEncodingFailureCase1(): void
-    {
         // Test the case where the percent encoding is (% HEXDIG NON-HEXDIG)
-        $this->expectException(\InvalidArgumentException::class);
-        Rfc3986::validatePercentEncoding("testing-%AG-testing");
-    }
+        $this->assertFalse(Rfc3986::isPercentEncodingValid("testing-%AG-testing"));
 
-    public function testValidatePercentEncodingFailureCase2(): void
-    {
         // Test the case where the percent encoding is (% NON-HEXDIG HEXDIG)
-        $this->expectException(\InvalidArgumentException::class);
-        Rfc3986::validatePercentEncoding("testing-%GA-testing");
-    }
+        $this->assertFalse(Rfc3986::isPercentEncodingValid("testing-%GA-testing"));
 
-    public function testValidatePercentEncodingFailureCase3(): void
-    {
         // Test the case where the percent encoding is (% NON-HEXDIG NON-HEXDIG)
-        $this->expectException(\InvalidArgumentException::class);
-        Rfc3986::validatePercentEncoding("testing-%GG-testing");
-    }
+        $this->assertFalse(Rfc3986::isPercentEncodingValid("testing-%GG-testing"));
 
-    public function testValidatePercentEncodingFailureCase4(): void
-    {
         // Test the case where the percent encoding is at the end of the string and cut short (% HEXDIG)
-        $this->expectException(\InvalidArgumentException::class);
-        Rfc3986::validatePercentEncoding("testing-%A");
-    }
+        $this->assertFalse(Rfc3986::isPercentEncodingValid("testing-%A"));
 
-    public function testValidatePercentEncodingFailureCase5(): void
-    {
         // Test the case where the percent encoding is at the end of the string and cut short (% NON-HEXDIG)
-        $this->expectException(\InvalidArgumentException::class);
-        Rfc3986::validatePercentEncoding("testing-%G");
+        $this->assertFalse(Rfc3986::isPercentEncodingValid("testing-%G"));
     }
 
     public function testIsIPLiteral(): void

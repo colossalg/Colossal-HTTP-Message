@@ -14,7 +14,7 @@ Run the PHPUnit test suites with the following command:
 To additionally print the test coverage results to stdout run the following command:
 
 ```bash
->> .\vendor\bin\phpunit --coverage-text
+>> .\vendor\bin\phpunit --coverage-html="coverage"
 ```
 
 ### Running PHPStan Code Quality Analysis

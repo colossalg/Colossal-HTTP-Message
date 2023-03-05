@@ -17,9 +17,16 @@ class Rfc7230
     public static function isRequestTargetInOriginForm(string $requestTarget): bool
     {
         $matches = [];
-        if (preg_match("/^([^?]+)+$/", $requestTarget, $matches, PREG_UNMATCHED_AS_NULL)) {
-            $isPathOk  = !is_null($matches[1]) && Rfc3986::isValidAbsolutePath($matches[1]);
-            $isQueryOk =  is_null($matches[2]) || Rfc3986::isValidQuery($matches[2]);
+        if (
+            preg_match(
+                "/^(?<path>[^?]+)(?:\?(?<query>[^?]+))?$/",
+                $requestTarget,
+                $matches,
+                PREG_UNMATCHED_AS_NULL
+            )
+        ) {
+            $isPathOk  = !is_null($matches["path"])  && Rfc3986::isValidAbsolutePath($matches["path"]);
+            $isQueryOk =  is_null($matches["query"]) || Rfc3986::isValidQuery($matches["query"]);
 
             return $isPathOk && $isQueryOk;
         }
@@ -40,10 +47,24 @@ class Rfc7230
         $uriComponents = [];
         try {
             $uriComponents = Rfc3986::parseUriIntoComponents($requestTarget);
-        } catch (\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException) {
+            return false;
         }
 
-        return is_null($uriComponents["fragment"]);
+        $scheme     = $uriComponents["scheme"];
+        $path       = $uriComponents["path"];
+        $query      = $uriComponents["query"];
+        $fragment   = $uriComponents["fragment"];
+
+        // Probably should check the authority here as well.
+        // See definition for heir-part:
+        //      https://www.rfc-editor.org/rfc/rfc3986#section-3
+        $hasValidScheme     = !is_null($scheme)     && Rfc3986::isValidScheme($scheme);
+        $hasValidPath       = !is_null($path)       && Rfc3986::isValidPath($path);
+        $hasValidQuery      =  is_null($query)      || Rfc3986::isValidQuery($query);
+        $hasValidFragment   =  is_null($fragment);
+
+        return $hasValidScheme && $hasValidPath && $hasValidQuery && $hasValidFragment;
     }
 
     /**
@@ -57,9 +78,9 @@ class Rfc7230
     public static function isRequestTargetInAuthorityForm(string $requestTarget): bool
     {
         $matches = [];
-        if (preg_match("/^([^:]+)+$/", $requestTarget, $matches, PREG_UNMATCHED_AS_NULL)) {
-            $isHostOk = !is_null($matches[1]) && Rfc3986::isValidHost($matches[1]);
-            $isPortOk =  is_null($matches[2]) || Rfc3986::isValidPort($matches[2]);
+        if (preg_match("/^(?<host>[^:]+)(?:\:(?<port>[^:]+))?$/", $requestTarget, $matches, PREG_UNMATCHED_AS_NULL)) {
+            $isHostOk = !is_null($matches["host"]) && Rfc3986::isValidHost($matches["host"]);
+            $isPortOk =  is_null($matches["port"]) || Rfc3986::isValidPort($matches["port"]);
 
             return $isHostOk && $isPortOk;
         }
