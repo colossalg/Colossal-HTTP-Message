@@ -37,20 +37,74 @@ class Rfc3986
     ];
 
     /**
+     * Parses a well formed URI in to its underlying components.
+     *     - Scheme
+     *     - Authority
+     *     - Path
+     *     - Query
+     *     - Fragment
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#appendix-B
+     *
+     * @param string $uri The URI to be parsed.
+     * @return array<null|string> An object containing the URI's underlying components.
+     * @throws \InvalidArgumentException If $uri is not a well formed URI.
+     */
+    public static function parseUriIntoComponents(string $uri): array
+    {
+        $matches = [];
+        $success = preg_match(
+            "%^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?%",
+            $uri,
+            $matches,
+            PREG_UNMATCHED_AS_NULL
+        );
+        if ($success) {
+            $components = [];
+            $components["scheme"]       = $matches[2];
+            $components["authority"]    = $matches[4];
+            $components["path"]         = $matches[5];
+            $components["query"]        = $matches[7];
+            $components["fragment"]     = $matches[9];
+            return $components;
+        }
+
+        throw new \InvalidArgumentException(
+            "Could not parse URI '$uri' in to components." .
+            "Please check that the URI is well formed as per RFC3986."
+        );
+    }
+
+    /**
+     * Determines whether a string represents a valid scheme component as per RFC3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-3.1
+     *
+     * The string is assumed to have already been percent encoded.
+     *
+     * @param string $scheme The scheme component to check.
+     * @return bool Whether $scheme represents a valid scheme component.
+     */
+    public static function isValidScheme(string $scheme): bool
+    {
+        return boolval(preg_match("/^[a-z][a-z0-9+\-.]*$/", $scheme));
+    }
+
+    /**
      * Performs encoding of the scheme component as per RFC 3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.1
      *
-     * @param string $scheme The user info component to encode.
+     * @param string $scheme The scheme component to encode.
      * @return string $scheme once it has been encoded.
      * @throws \InvalidArgumentException If $scheme is not valid as per RFC 3986.
      */
     public static function encodeScheme(string $scheme): string
     {
-        if (!preg_match("/[a-zA-Z][a-zA-Z0-9\+\-\.]*/", $scheme)) {
+        if (!self::isValidScheme(strtolower($scheme))) {
             throw new \InvalidArgumentException(
                 "Argument 'scheme' must start with a letter and may only contain " .
-                "characters from the following set: { a-z, A-Z, 0-9, +, -, .}."
+                "characters from the following set: { a-z, 0-9, +, -, .}."
             );
         }
 
@@ -76,6 +130,28 @@ class Rfc3986
         return self::encode(
             $userInfo,
             array_merge(self::UNRESERVED, self::SUB_DELIMS, [":"])
+        );
+    }
+
+    /**
+     * Determines whether a string represents a valid host component as per RFC 3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-3.2.2
+     *
+     * The string is assumed to have already been percent encoded.
+     *
+     * @param string $host The host component to check.
+     * @return bool Whether $host represents a valid host component.
+     */
+    public static function isValidHost(string $host)
+    {
+        if (self::isIPLiteral($host)) {
+            return true;
+        }
+
+        return (
+            self::isPercentEncodingValid($host) &&
+            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=]+$/", $host))
         );
     }
 
@@ -106,6 +182,56 @@ class Rfc3986
     }
 
     /**
+     * Determines whether a string represents a valid port component as per RFC 3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-3.2.3
+     *
+     * @param int|string $port The port component to check.
+     * @return bool Whether $port represents a valid port component.
+     */
+    public static function isValidPort(int|string $port): bool
+    {
+        return is_int($port) || boolval(preg_match("/^[0-9]+$/", $port));
+    }
+
+    /**
+     * Determines whether a string represents a valid path component as per RFC 3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-3.3
+     *
+     * The string is assumed to have already been percent encoded.
+     *
+     * @param string $path The path component to check.
+     * @return bool Whether $path represents a valid path component.
+     */
+    public static function isValidPath(string $path): bool
+    {
+        return (
+            self::isPercentEncodingValid($path) &&
+            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:@\/]*$/", $path))
+        );
+    }
+
+    /**
+     * Determines whether a string represents a valid absolute path component as per RFC 3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-3.3
+     *
+     * The string is assumed to have already been percent encoded.
+     *
+     * @param string $path The path component to check.
+     * @return bool Whether $path represents a valid absolute path component.
+     */
+    public static function isValidAbsolutePath(string $path): bool
+    {
+        if (!str_starts_with($path, "/") || str_starts_with($path, "//")) {
+            return false;
+        }
+
+        return self::isValidPath($path);
+    }
+
+    /**
      * Performs encoding of the path component as per RFC 3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.3
@@ -128,6 +254,24 @@ class Rfc3986
     }
 
     /**
+     * Determines whether a string represents a valid query component as per RFC3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-3.4
+     *
+     * The string is assumed to have already been percent encoded.
+     *
+     * @param string $query The query component to check.
+     * @return bool Whether $query represents a valid query component.
+     */
+    public static function isValidQuery(string $query): bool
+    {
+        return (
+            self::isPercentEncodingValid($query) &&
+            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:@\/?]+$/", $query))
+        );
+    }
+
+    /**
      * Performs encoding of the query component as per RFC 3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.4
@@ -146,6 +290,24 @@ class Rfc3986
         return self::encode(
             $query,
             array_merge(self::UNRESERVED, self::SUB_DELIMS, [":", "@", "/", "?"])
+        );
+    }
+
+    /**
+     * Determines whether a string represents a valid fragment component as per RFC3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-3.4
+     *
+     * The string is assumed to have already been percent encoded.
+     *
+     * @param string $fragment The fragment component to check.
+     * @return bool Whether $fragment represents a valid fragment component.
+     */
+    public static function isValidFragment(string $fragment): bool
+    {
+        return (
+            self::isPercentEncodingValid($fragment) &&
+            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:@\/?]+$/", $fragment))
         );
     }
 
@@ -221,9 +383,7 @@ class Rfc3986
         );
 
         if (is_null($encoded)) {
-            // @codeCoverageIgnoreStart
             throw new \RuntimeException("An error occurred trying to perform percent encoding for $str.");
-            // @codeCoverageIgnoreEnd
         }
 
         return $encoded;
@@ -255,6 +415,25 @@ class Rfc3986
         if (preg_match("/(%(?![a-fA-F0-9]{2}).{0,2})/", $str, $matches)) {
             throw new \InvalidArgumentException("Argument 'str' contains invalid percent encoding '$matches[0]'.");
         }
+    }
+
+    /**
+     * Returns whether all percent encodings of a given string are valid as described by RFC 3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-2.1
+     *
+     * @param string $str The string to validate.
+     * @return bool Whether all percent encodings found within $str are valid.
+     */
+    public static function isPercentEncodingValid(string $str): bool
+    {
+        try {
+            self::validatePercentEncoding($str);
+        } catch (\InvalidArgumentException) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
