@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Colossal\Http\Testing;
 
 use Colossal\Http\Message;
-use Colossal\Http\NullStream;
+use Colossal\Http\Stream\NullStream;
 use PHPUnit\Framework\TestCase;
 
 /**
