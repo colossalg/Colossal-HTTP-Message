@@ -12,55 +12,176 @@ use PHPUnit\Framework\TestCase;
  */
 final class ResourceStreamTest extends TestCase
 {
-    // public function testToString(): void
-    // {
-    //     // TODO
-    // }
+    public function testCreateWithProvidedResourceThrowsForNonResourceArgument(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        ResourceStream::createWithProvidedResource(1); /** @phpstan-ignore-line */
+    }
 
-    // public function testClose(): void
-    // {
-    //     // TODO`
-    // }
+    public function testDestruct(): void
+    {
+        $resource = fopen("php://temp", "r+b");
+        if ($resource === false) {
+            throw new \RuntimeException("Call to fopen() failed.");
+        }
 
-    // public function testDetach(): void
-    // {
-    //     // TODO
-    // }
+        $str = "Hello World!";
+        $resourceStream = ResourceStream::createWithProvidedResource($resource);
+        $resourceStream->write($str);
+        $resourceStream->__destruct();
 
-    // public function testGetSize(): void
-    // {
-    //     // TODO
-    // }
+        // Should not be able to get contents any more.
+        $this->expectException(\RuntimeException::class);
+        $resourceStream->getContents();
 
-    // public function testGetSizeThrowsIfUnderlyingResourceIsNotValid(): void
-    // {
-    //     // TODO
-    // }
+        // Underlying resource should be closed.
+        $this->assertTrue(feof($resource));
+    }
 
-    // public function testTell(): void
-    // {
-    //     // TODO
-    // }
+    public function testDestructAfterDetach(): void
+    {
+        $resource = fopen("php://temp", "r+b");
+        if ($resource === false) {
+            throw new \RuntimeException("Call to fopen() failed.");
+        }
 
-    // public function testTellThrowsIfUnderlyingResourceIsNotValid(): void
-    // {
-    //     // TODO
-    // }
+        $str = "Hello World!";
+        $resourceStream = ResourceStream::createWithProvidedResource($resource);
+        $resourceStream->write($str);
+        $resourceStream->detach();
+        $resourceStream->__destruct();
 
-    // public function testTellThrowsIfUnderlyingResourceIsAppendOnly(): void
-    // {
-    //     // TODO
-    // }
+        // Should not be able to get contents any more.
+        $this->expectException(\RuntimeException::class);
+        $resourceStream->getContents();
 
-    // public function testEof(): void
-    // {
-    //     // TODO
-    // }
+        // Underlying resource should not be closed and can still be read.
+        $this->assertFalse(feof($resource));
+        $this->assertEquals($str, stream_get_contents($resource));
+    }
 
-    // public function testEofThrowsIfUnderlyingResourceIsNotValid(): void
-    // {
-    //     // TODO
-    // }
+    public function testToString(): void
+    {
+        // Test the method for a readable stream.
+        $str = "Hello World!";
+        $resourceStream = $this->createReadWriteResourceStream();
+        $resourceStream->write($str);
+        $this->assertEquals($str, $resourceStream->__toString());
+        $resourceStream->close();
+        $this->assertEquals("", $resourceStream->__toString());
+    }
+
+    public function testClose(): void
+    {
+        $resource = fopen("php://temp", "r+b");
+        if ($resource === false) {
+            throw new \RuntimeException("Call to fopen() failed.");
+        }
+
+        $str = "Hello World!";
+        $resourceStream = ResourceStream::createWithProvidedResource($resource);
+        $resourceStream->write($str);
+        $this->assertEquals($str, $resourceStream->getContents());
+
+        $resourceStream->close();
+
+        // Should not be able to get contents any more.
+        $this->expectException(\RuntimeException::class);
+        $resourceStream->getContents();
+
+        // Underlying resource should be closed.
+        $this->assertTrue(feof($resource));
+    }
+
+    public function testDetach(): void
+    {
+        $resource = fopen("php://temp", "r+b");
+        if ($resource === false) {
+            throw new \RuntimeException("Call to fopen() failed.");
+        }
+
+        $str = "Hello World!";
+        $resourceStream = ResourceStream::createWithProvidedResource($resource);
+        $resourceStream->write($str);
+        $this->assertEquals($str, $resourceStream->getContents());
+
+        $this->assertEquals($resource, $resourceStream->detach());
+        $this->assertNull($resourceStream->detach());
+
+        // Should not be able to get contents any more.
+        $this->expectException(\RuntimeException::class);
+        $resourceStream->getContents();
+
+        // Underlying resource should not be closed and can still be read.
+        $this->assertFalse(feof($resource));
+        $this->assertEquals($str, stream_get_contents($resource));
+    }
+
+    public function testGetSize(): void
+    {
+        // Test the method for the general use case.
+        $str = "Hello World!";
+        $resourceStream = $this->createReadWriteResourceStream();
+        $this->assertEquals(0, $resourceStream->getSize());
+        $resourceStream->write($str);
+        $this->assertEquals(strlen($str), $resourceStream->getSize());
+    }
+
+    public function testGetSizeThrowsIfUnderlyingResourceIsNotValid(): void
+    {
+        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        $resourceStream = $this->createReadWriteResourceStream();
+        $resourceStream->close();
+        $this->expectException(\RuntimeException::class);
+        $resourceStream->getSize();
+    }
+
+    public function testTell(): void
+    {
+        // Test the method for the general use case.
+        $str = "Hello World!";
+        $resourceStream = $this->createReadWriteResourceStream();
+        $resourceStream->write($str);
+        $this->assertEquals(strlen($str), $resourceStream->tell());
+        $resourceStream->seek(0);
+        $this->assertEquals(0, $resourceStream->tell());
+        $resourceStream->seek(5);
+        $this->assertEquals(5, $resourceStream->tell());
+    }
+
+    public function testTellThrowsIfUnderlyingResourceIsNotValid(): void
+    {
+        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        $resourceStream = $this->createReadWriteResourceStream();
+        $resourceStream->close();
+        $this->expectException(\RuntimeException::class);
+        $resourceStream->tell();
+    }
+
+    public function testEof(): void
+    {
+        // Test the method for the general use case.
+        $str = "Hello World!";
+        $resourceStream = $this->createReadWriteResourceStream();
+        $this->assertFalse($resourceStream->eof());
+        $resourceStream->write($str);
+        $this->assertFalse($resourceStream->eof());
+        $resourceStream->read(strlen($str) + 1);
+        $this->assertTrue($resourceStream->eof());
+        $resourceStream->rewind();
+        $this->assertFalse($resourceStream->eof());
+        $resourceStream->read(strlen($str) + 1);
+        $this->assertTrue($resourceStream->eof());
+    }
+
+    public function testEofThrowsIfUnderlyingResourceIsNotValid(): void
+    {
+        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        $resourceStream = $this->createReadWriteResourceStream();
+        $resourceStream->close();
+        $this->expectException(\RuntimeException::class);
+        $resourceStream->eof();
+    }
 
     public function testIsSeekable(): void
     {

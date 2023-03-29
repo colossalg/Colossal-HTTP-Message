@@ -113,10 +113,6 @@ class ResourceStream implements StreamInterface
     {
         $this->assertValid();
 
-        if ($this->isAppendOnly()) {
-            throw new \RuntimeException("Underlying resource is append only (can not use ftell()).");
-        }
-
         $res = ftell($this->resource);
         if ($res === false) {
             throw new \RuntimeException("Call to ftell() failed.");
@@ -132,8 +128,7 @@ class ResourceStream implements StreamInterface
     {
         $this->assertValid();
 
-        $metadata = stream_get_meta_data($this->resource);
-        return $metadata["eof"];
+        return feof($this->resource);
     }
 
     /**
@@ -261,12 +256,6 @@ class ResourceStream implements StreamInterface
         }
 
         return $metadata;
-    }
-
-    private function isAppendOnly(): bool
-    {
-        $metadata = stream_get_meta_data($this->resource);
-        return ($metadata["mode"] === "a" || $metadata["mode"] === "ab");
     }
 
     private function assertValid(): void
