@@ -58,6 +58,7 @@ class ResourceStream implements StreamInterface
     {
         $res = "";
         try {
+            $this->rewind();
             $res = $this->getContents();
         } catch (\RuntimeException) {
             $res = "";
@@ -138,8 +139,7 @@ class ResourceStream implements StreamInterface
     {
         $this->assertValid();
 
-        $metadata = stream_get_meta_data($this->resource);
-        return $metadata["seekable"];
+        return boolval($this->getMetadata("seekable"));
     }
 
     /**
@@ -169,11 +169,12 @@ class ResourceStream implements StreamInterface
     {
         $this->assertValid();
 
-        $metadata   = stream_get_meta_data($this->resource);
-        $mode       = $metadata["mode"];
+        $mode = $this->getMetadata("mode");
         return (
-            array_search($mode, static::WRITE_ONLY_MODES) !== false ||
-            array_search($mode, static::READ_WRITE_MODES) !== false
+            !is_null($mode) && (
+                array_search($mode, static::WRITE_ONLY_MODES) !== false ||
+                array_search($mode, static::READ_WRITE_MODES) !== false
+            )
         );
     }
 
@@ -201,11 +202,12 @@ class ResourceStream implements StreamInterface
     {
         $this->assertValid();
 
-        $metadata   = stream_get_meta_data($this->resource);
-        $mode       = $metadata["mode"];
+        $mode = $this->getMetadata("mode");
         return (
-            array_search($mode, static::READ_ONLY_MODES)  !== false ||
-            array_search($mode, static::READ_WRITE_MODES) !== false
+            !is_null($mode) && (
+                array_search($mode, static::READ_ONLY_MODES)  !== false ||
+                array_search($mode, static::READ_WRITE_MODES) !== false
+            )
         );
     }
 
