@@ -15,7 +15,7 @@ final class ResourceStreamTest extends TestCase
     public function testCreateWithProvidedResourceThrowsForNonResourceArgument(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        ResourceStream::createWithProvidedResource(1); /** @phpstan-ignore-line */
+        new ResourceStream(1); /** @phpstan-ignore-line */
     }
 
     public function testDestruct(): void
@@ -26,7 +26,7 @@ final class ResourceStreamTest extends TestCase
         }
 
         $str = "Hello World!";
-        $resourceStream = ResourceStream::createWithProvidedResource($resource);
+        $resourceStream = new ResourceStream($resource);
         $resourceStream->write($str);
         $resourceStream->__destruct();
 
@@ -46,7 +46,7 @@ final class ResourceStreamTest extends TestCase
         }
 
         $str = "Hello World!";
-        $resourceStream = ResourceStream::createWithProvidedResource($resource);
+        $resourceStream = new ResourceStream($resource);
         $resourceStream->write($str);
         $resourceStream->detach();
         $resourceStream->__destruct();
@@ -79,7 +79,7 @@ final class ResourceStreamTest extends TestCase
         }
 
         $str = "Hello World!";
-        $resourceStream = ResourceStream::createWithProvidedResource($resource);
+        $resourceStream = new ResourceStream($resource);
         $resourceStream->write($str);
         $this->assertEquals($str, $resourceStream->getContents());
 
@@ -101,7 +101,7 @@ final class ResourceStreamTest extends TestCase
         }
 
         $str = "Hello World!";
-        $resourceStream = ResourceStream::createWithProvidedResource($resource);
+        $resourceStream = new ResourceStream($resource);
         $resourceStream->write($str);
         $this->assertEquals($str, $resourceStream->getContents());
 
@@ -337,7 +337,7 @@ final class ResourceStreamTest extends TestCase
         if ($resource === false) {
             throw new \RuntimeException("Failed to open php://stdin.");
         }
-        return ResourceStream::createWithProvidedResource($resource);
+        return new ResourceStream($resource);
     }
 
     private function createWriteOnlyResourceStream(): ResourceStream
@@ -347,7 +347,7 @@ final class ResourceStreamTest extends TestCase
         if ($resource === false) {
             throw new \RuntimeException("Failed to open php://stdout.");
         }
-        return ResourceStream::createWithProvidedResource($resource);
+        return new ResourceStream($resource);
     }
 
     private function createReadWriteResourceStream(): ResourceStream
@@ -357,6 +357,6 @@ final class ResourceStreamTest extends TestCase
             throw new \RuntimeException("Call to fopen() failed.");
         }
 
-        return ResourceStream::createWithProvidedResource($resource);
+        return new ResourceStream($resource);
     }
 }
