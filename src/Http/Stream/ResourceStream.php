@@ -26,21 +26,17 @@ class ResourceStream implements StreamInterface
     ];
 
     /**
-     * Creates a new instance with the provided underlying resource.
+     * Constructor.
      * @param resource $resource The provided underlying resource.
-     * @return ResourceStream The new instance.
      */
-    public static function createWithProvidedResource($resource): ResourceStream
+    public function __construct($resource)
     {
         if (!is_resource($resource)) {
             throw new \InvalidArgumentException("Argument 'resource' must have type resource.");
         }
 
-        $instance = new ResourceStream();
-        $instance->valid    = true;
-        $instance->resource = $resource;
-
-        return $instance;
+        $this->valid    = true;
+        $this->resource = $resource;
     }
 
     /**
@@ -97,7 +93,9 @@ class ResourceStream implements StreamInterface
      */
     public function getSize(): null|int
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return null;
+        }
 
         $res = fstat($this->resource);
         if ($res === false) {
@@ -127,7 +125,9 @@ class ResourceStream implements StreamInterface
      */
     public function eof(): bool
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return true;
+        }
 
         return feof($this->resource);
     }
@@ -137,7 +137,9 @@ class ResourceStream implements StreamInterface
      */
     public function isSeekable(): bool
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return false;
+        }
 
         return boolval($this->getMetadata("seekable"));
     }
@@ -147,6 +149,8 @@ class ResourceStream implements StreamInterface
      */
     public function seek($offset, $whence = SEEK_SET): void
     {
+        $this->assertValid();
+
         if (!$this->isSeekable()) {
             throw new \RuntimeException("Underlying resource is not seekable.");
         }
@@ -167,7 +171,9 @@ class ResourceStream implements StreamInterface
      */
     public function isWritable(): bool
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return false;
+        }
 
         $mode = $this->getMetadata("mode");
         return (
@@ -183,6 +189,8 @@ class ResourceStream implements StreamInterface
      */
     public function write($string): int
     {
+        $this->assertValid();
+
         if (!$this->isWritable()) {
             throw new \RuntimeException("Underlying resource is not writable.");
         }
@@ -200,7 +208,9 @@ class ResourceStream implements StreamInterface
      */
     public function isReadable(): bool
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return false;
+        }
 
         $mode = $this->getMetadata("mode");
         return (
@@ -216,6 +226,8 @@ class ResourceStream implements StreamInterface
      */
     public function read($length): string
     {
+        $this->assertValid();
+
         if (!$this->isReadable()) {
             throw new \RuntimeException("Underlying resource is not readable.");
         }
@@ -233,6 +245,8 @@ class ResourceStream implements StreamInterface
      */
     public function getContents(): string
     {
+        $this->assertValid();
+
         if (!$this->isReadable()) {
             throw new \RuntimeException("Underlying resource is not readable.");
         }
@@ -250,7 +264,9 @@ class ResourceStream implements StreamInterface
      */
     public function getMetadata($key = null): mixed
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return (is_null($key) ? [] : null);
+        }
 
         $metadata = stream_get_meta_data($this->resource);
         if (!is_null($key)) {
@@ -270,7 +286,7 @@ class ResourceStream implements StreamInterface
     /**
      * @var bool Whether the underlying resource for this stream is valid (has not been closed or detached).
      */
-    private bool $valid = true;
+    private bool $valid;
 
     /**
      * @var resource The underlying resource for this stream (generally php://input or php://temp).
