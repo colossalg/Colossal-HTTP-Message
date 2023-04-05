@@ -12,6 +12,8 @@ use PHPUnit\Framework\TestCase;
  */
 final class ResourceStreamTest extends TestCase
 {
+    public const ASSERT_INVALID_MESSAGE = "Underlying resource is invalid (has been closed or detached).";
+
     public function testCreateWithProvidedResourceThrowsForNonResourceArgument(): void
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -31,7 +33,7 @@ final class ResourceStreamTest extends TestCase
         $resourceStream->__destruct();
 
         // Should not be able to get contents any more.
-        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
         $resourceStream->getContents();
 
         // Underlying resource should be closed.
@@ -52,7 +54,7 @@ final class ResourceStreamTest extends TestCase
         $resourceStream->__destruct();
 
         // Should not be able to get contents any more.
-        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
         $resourceStream->getContents();
 
         // Underlying resource should not be closed and can still be read.
@@ -86,7 +88,7 @@ final class ResourceStreamTest extends TestCase
         $resourceStream->close();
 
         // Should not be able to get contents any more.
-        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
         $resourceStream->getContents();
 
         // Underlying resource should be closed.
@@ -109,7 +111,7 @@ final class ResourceStreamTest extends TestCase
         $this->assertNull($resourceStream->detach());
 
         // Should not be able to get contents any more.
-        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
         $resourceStream->getContents();
 
         // Underlying resource should not be closed and can still be read.
@@ -125,15 +127,10 @@ final class ResourceStreamTest extends TestCase
         $this->assertEquals(0, $resourceStream->getSize());
         $resourceStream->write($str);
         $this->assertEquals(strlen($str), $resourceStream->getSize());
-    }
 
-    public function testGetSizeThrowsIfUnderlyingResourceIsNotValid(): void
-    {
-        // Test that the method will throw if the resource is not valid (ex. has been closed).
-        $resourceStream = $this->createReadWriteResourceStream();
+        // The method should not throw even if the resource is not valid.
         $resourceStream->close();
-        $this->expectException(\RuntimeException::class);
-        $resourceStream->getSize();
+        $this->assertNull($resourceStream->getSize());
     }
 
     public function testTell(): void
@@ -154,7 +151,7 @@ final class ResourceStreamTest extends TestCase
         // Test that the method will throw if the resource is not valid (ex. has been closed).
         $resourceStream = $this->createReadWriteResourceStream();
         $resourceStream->close();
-        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
         $resourceStream->tell();
     }
 
@@ -172,31 +169,25 @@ final class ResourceStreamTest extends TestCase
         $this->assertFalse($resourceStream->eof());
         $resourceStream->read(strlen($str) + 1);
         $this->assertTrue($resourceStream->eof());
-    }
 
-    public function testEofThrowsIfUnderlyingResourceIsNotValid(): void
-    {
-        // Test that the method will throw if the resource is not valid (ex. has been closed).
-        $resourceStream = $this->createReadWriteResourceStream();
+        // The method should not throw even if the resource is not valid.
+        $resourceStream->rewind();
+        $this->assertFalse($resourceStream->eof());
         $resourceStream->close();
-        $this->expectException(\RuntimeException::class);
-        $resourceStream->eof();
+        $this->assertTrue($resourceStream->eof());
     }
 
     public function testIsSeekable(): void
     {
         // Test the method for the general use case.
         $this->assertFalse($this->createReadOnlyResourceStream()->isSeekable());
+        $this->assertFalse($this->createWriteOnlyResourceStream()->isSeekable());
         $this->assertTrue($this->createReadWriteResourceStream()->isSeekable());
-    }
 
-    public function testIsSeekableThrowsIfUnderlyingResourceIsNotValid(): void
-    {
-        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        // The method should not throw even if the resource is not valid.
         $resourceStream = $this->createReadWriteResourceStream();
         $resourceStream->close();
-        $this->expectException(\RuntimeException::class);
-        $resourceStream->isSeekable();
+        $this->assertFalse($resourceStream->isSeekable());
     }
 
     public function testSeek(): void
@@ -209,6 +200,15 @@ final class ResourceStreamTest extends TestCase
         $this->assertEquals(0, $resourceStream->tell());
         $resourceStream->seek(5);
         $this->assertEquals(5, $resourceStream->tell());
+    }
+
+    public function testSeekThrowsIfUnderlyingResourceIsNotValid(): void
+    {
+        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        $resourceStream = $this->createReadWriteResourceStream();
+        $resourceStream->close();
+        $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
+        $resourceStream->seek(0);
     }
 
     public function testSeekThrowsIfIsSeekableIsFalse(): void
@@ -234,15 +234,11 @@ final class ResourceStreamTest extends TestCase
         $this->assertFalse($this->createReadOnlyResourceStream()->isWritable());
         $this->assertTrue($this->createWriteOnlyResourceStream()->isWritable());
         $this->assertTrue($this->createReadWriteResourceStream()->isWritable());
-    }
 
-    public function testIsWritableThrowsIfUnderlyingResourceIsNotValid(): void
-    {
-        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        // The method should not throw even if the resource is not valid.
         $resourceStream = $this->createReadWriteResourceStream();
         $resourceStream->close();
-        $this->expectException(\RuntimeException::class);
-        $resourceStream->isWritable();
+        $this->assertFalse($resourceStream->isWritable());
     }
 
     public function testWrite(): void
@@ -253,11 +249,20 @@ final class ResourceStreamTest extends TestCase
         $this->assertEquals("Hello World!", $resourceStream->getContents());
     }
 
+    public function testWriteThrowsIfUnderlyingResourceIsNotValid(): void
+    {
+        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        $resourceStream = $this->createReadWriteResourceStream();
+        $resourceStream->close();
+        $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
+        $resourceStream->write("Hello World!");
+    }
+
     public function testWriteThrowsIfIsWritableIsFalse(): void
     {
         // Test that the method throws if the underlying stream is not writable.
         $this->expectException(\RuntimeException::class);
-        $this->createReadOnlyResourceStream()->write("10");
+        $this->createReadOnlyResourceStream()->write("Hello World!");
     }
 
     public function testIsReadable(): void
@@ -266,15 +271,11 @@ final class ResourceStreamTest extends TestCase
         $this->assertTrue($this->createReadOnlyResourceStream()->isReadable());
         $this->assertFalse($this->createWriteOnlyResourceStream()->isReadable());
         $this->assertTrue($this->createReadWriteResourceStream()->isReadable());
-    }
 
-    public function testIsReadableThrowsIfUnderlyingResourceIsNotValid(): void
-    {
-        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        // The method should not throw even if the resource is not valid.
         $resourceStream = $this->createReadWriteResourceStream();
         $resourceStream->close();
-        $this->expectException(\RuntimeException::class);
-        $resourceStream->isReadable();
+        $this->assertFalse($resourceStream->isReadable());
     }
 
     public function testRead(): void
@@ -285,6 +286,15 @@ final class ResourceStreamTest extends TestCase
         $resourceStream->rewind();
         $this->assertEquals("Hello World!", $resourceStream->read(12));
         $this->assertEquals("", $resourceStream->read(12));
+    }
+
+    public function testReadThrowsIfUnderlyingResourceIsNotValid(): void
+    {
+        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        $resourceStream = $this->createReadWriteResourceStream();
+        $resourceStream->close();
+        $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
+        $resourceStream->read(10);
     }
 
     public function testReadThrowsIfIsReadableIsFalse(): void
@@ -304,6 +314,15 @@ final class ResourceStreamTest extends TestCase
         $this->assertEquals("Hello World!", $resourceStream->getContents());
     }
 
+    public function testGetContentsThrowsIfUnderlyingResourceIsNotValid(): void
+    {
+        // Test that the method will throw if the resource is not valid (ex. has been closed).
+        $resourceStream = $this->createReadWriteResourceStream();
+        $resourceStream->close();
+        $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
+        $resourceStream->getContents();
+    }
+
     public function testGetContentsThrowsIfIsReadableIsFalse(): void
     {
         // Test that the method throws if the underlying stream is not readable.
@@ -319,15 +338,11 @@ final class ResourceStreamTest extends TestCase
         $this->assertEquals("w+b", $resourceStream->getMetadata()["mode"]);
         $this->assertEquals("w+b", $resourceStream->getMetadata("mode"));
         $this->assertNull($resourceStream->getMetadata("dummy"));
-    }
 
-    public function testGetMetadataThrowsIfUnderlyingResourceIsNotValid(): void
-    {
-        // Test that the method will throw if the resource is not valid (ex. has been closed).
-        $resourceStream = $this->createReadWriteResourceStream();
+        // The method should not throw even if the resource is not valid.
         $resourceStream->close();
-        $this->expectException(\RuntimeException::class);
-        $resourceStream->getMetaData();
+        $this->assertNull($resourceStream->getMetadata("mode"));
+        $this->assertEmpty($resourceStream->getMetadata());
     }
 
     private function createReadOnlyResourceStream(): ResourceStream

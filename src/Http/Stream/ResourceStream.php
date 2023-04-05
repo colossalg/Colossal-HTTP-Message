@@ -93,7 +93,9 @@ class ResourceStream implements StreamInterface
      */
     public function getSize(): null|int
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return null;
+        }
 
         $res = fstat($this->resource);
         if ($res === false) {
@@ -123,7 +125,9 @@ class ResourceStream implements StreamInterface
      */
     public function eof(): bool
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return true;
+        }
 
         return feof($this->resource);
     }
@@ -133,7 +137,9 @@ class ResourceStream implements StreamInterface
      */
     public function isSeekable(): bool
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return false;
+        }
 
         return boolval($this->getMetadata("seekable"));
     }
@@ -143,6 +149,8 @@ class ResourceStream implements StreamInterface
      */
     public function seek($offset, $whence = SEEK_SET): void
     {
+        $this->assertValid();
+
         if (!$this->isSeekable()) {
             throw new \RuntimeException("Underlying resource is not seekable.");
         }
@@ -163,7 +171,9 @@ class ResourceStream implements StreamInterface
      */
     public function isWritable(): bool
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return false;
+        }
 
         $mode = $this->getMetadata("mode");
         return (
@@ -179,6 +189,8 @@ class ResourceStream implements StreamInterface
      */
     public function write($string): int
     {
+        $this->assertValid();
+
         if (!$this->isWritable()) {
             throw new \RuntimeException("Underlying resource is not writable.");
         }
@@ -196,7 +208,9 @@ class ResourceStream implements StreamInterface
      */
     public function isReadable(): bool
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return false;
+        }
 
         $mode = $this->getMetadata("mode");
         return (
@@ -212,6 +226,8 @@ class ResourceStream implements StreamInterface
      */
     public function read($length): string
     {
+        $this->assertValid();
+
         if (!$this->isReadable()) {
             throw new \RuntimeException("Underlying resource is not readable.");
         }
@@ -229,6 +245,8 @@ class ResourceStream implements StreamInterface
      */
     public function getContents(): string
     {
+        $this->assertValid();
+
         if (!$this->isReadable()) {
             throw new \RuntimeException("Underlying resource is not readable.");
         }
@@ -246,7 +264,9 @@ class ResourceStream implements StreamInterface
      */
     public function getMetadata($key = null): mixed
     {
-        $this->assertValid();
+        if (!$this->valid) {
+            return (is_null($key) ? [] : null);
+        }
 
         $metadata = stream_get_meta_data($this->resource);
         if (!is_null($key)) {
