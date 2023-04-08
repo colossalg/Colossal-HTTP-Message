@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Utilities\Testing;
+namespace Colossal\Utilities;
 
+use Colossal\Utilities\ForcedFailuresUtilities;
 use Colossal\Utilities\Rfc7230;
 use PHPUnit\Framework\TestCase;
 
@@ -13,6 +14,18 @@ use PHPUnit\Framework\TestCase;
  */
 final class Rfc7230Test extends TestCase
 {
+    public function setUp(): void
+    {
+        ForcedFailuresUtilities::reset();
+        $this->forcedFailures = ForcedFailuresUtilities::getInstance();
+    }
+
+    public function assertPreConditions(): void
+    {
+        $this->assertFalse($this->forcedFailures->preg_match);
+        $this->assertFalse($this->forcedFailures->preg_replace_callback);
+    }
+
     public function testIsRequestTargetInOriginForm(): void
     {
         // Test when the request target contains a valid absolute path and a valid query component
@@ -55,6 +68,10 @@ final class Rfc7230Test extends TestCase
 
         // Test when the request target is empty
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm(""));
+
+        // Test when Rfc3986::parseUriInToComponentsFails (preg_match() failing forces this to occur)
+        $this->forcedFailures->preg_match = true;
+        $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("http://localhost:8000"));
     }
 
     public function testIsRequestTargetInAuthorityForm(): void
@@ -81,4 +98,6 @@ final class Rfc7230Test extends TestCase
         // Just for the sake of the code coverage metrics really
         $this->assertTrue(Rfc7230::isRequestTargetInAsteriskForm("*"));
     }
+
+    private ForcedFailuresUtilities $forcedFailures;
 }

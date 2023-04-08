@@ -3,4 +3,7 @@ parameters:
     paths:
         - src
         - test
+    excludePaths:
+        analyse:
+            - test/ForcedFailures.php
     treatPhpDocTypesAsCertain: false

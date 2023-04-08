@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Utilities\Testing;
+namespace Colossal\Utilities;
 
 use Colossal\Utilities\Utilities;
 use PHPUnit\Framework\TestCase;

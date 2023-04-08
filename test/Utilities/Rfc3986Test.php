@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Utilities\Testing;
+namespace Colossal\Utilities;
 
+use Colossal\Utilities\ForcedFailuresUtilities;
 use Colossal\Utilities\Rfc3986;
 use PHPUnit\Framework\TestCase;
 
@@ -12,6 +13,12 @@ use PHPUnit\Framework\TestCase;
  */
 final class Rfc3986Test extends TestCase
 {
+    public function setUp(): void
+    {
+        ForcedFailuresUtilities::reset();
+        $this->forcedFailures = ForcedFailuresUtilities::getInstance();
+    }
+
     public function testParseUriIntoComponents(): void
     {
         // The following test cases are formatted as follows:
@@ -51,6 +58,14 @@ final class Rfc3986Test extends TestCase
             $this->assertEquals($expectedComponents[3], $components["query"]);
             $this->assertEquals($expectedComponents[4], $components["fragment"]);
         }
+    }
+
+    public function testParseUriIntoComponentsThrowsIfPregMatchFails(): void
+    {
+        // Test that the method throws if preg_match() fails
+        $this->forcedFailures->preg_match = true;
+        $this->expectException(\InvalidArgumentException::class);
+        Rfc3986::parseUriIntoComponents("http://localhost:8080");
     }
 
     public function testIsValidScheme(): void
@@ -368,6 +383,14 @@ final class Rfc3986Test extends TestCase
         $this->assertEquals($expected, Rfc3986::encode($encodedHttpUrl));
     }
 
+    public function testEncodeThrowsIfPregReplaceCallbackFails(): void
+    {
+        // Test that the method throws if preg_replace_callback() fails
+        $this->forcedFailures->preg_replace_callback = true;
+        $this->expectException(\RuntimeException::class);
+        Rfc3986::encode("http://localhost:8080");
+    }
+
     public function testValidateIsAsciiPassingCase(): void
     {
         // Test that the method will not throw when the string contains only US-ASCII
@@ -502,4 +525,6 @@ final class Rfc3986Test extends TestCase
             $this->assertEquals($expected, Rfc3986::isIPvFutureAddress($address), "Test failed for address $address");
         }
     }
+
+    private ForcedFailuresUtilities $forcedFailures;
 }

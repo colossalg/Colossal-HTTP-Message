@@ -382,7 +382,7 @@ class Rfc3986
             $encoded
         );
 
-        if (is_null($encoded)) {
+        if (is_array($encoded) || is_null($encoded)) {
             throw new \RuntimeException("An error occurred trying to perform percent encoding for $str.");
         }
 
