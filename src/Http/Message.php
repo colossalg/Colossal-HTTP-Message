@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use Colossal\Http\Stream;
+use Colossal\Http\Stream\NullStream;
 use Colossal\Utilities\Utilities;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
@@ -21,7 +21,7 @@ class Message implements MessageInterface
     {
         $this->protocolVersion  = self::DEFAULT_PROTOCOL_VERSION;
         $this->headers          = [];
-        $this->body             = new Stream\NullStream();
+        $this->body             = new NullStream();
     }
 
     /**
