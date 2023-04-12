@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:ignoreFile
+
 // This file contains classes and functions which allow the overrides of the
 // PHP built in functions. To do so we take advantage of how PHP resolves the
 // symbols.
@@ -23,15 +25,17 @@ declare(strict_types=1);
 
 namespace Colossal
 {
-    class NotSet {}
-
-    class PhpOverrides
+    class NotSet
     {
-        protected static null|self $instance = null;
+    }
+
+    final class PhpOverrides
+    {
+        protected static self $instance;
 
         public static function getInstance(): static
         {
-            if (is_null(self::$instance)) {
+            if (!isset(self::$instance)) {
                 static::reset();
             }
             return static::$instance;
@@ -44,24 +48,119 @@ namespace Colossal
 
         public function __construct()
         {
-            $this->fstat    = new NotSet();
-            $this->ftell    = new NotSet();
-            $this->fwrite   = new NotSet();
-            $this->fread    = new NotSet();
+            $this->is_dir = new NotSet();
+            $this->is_file = new NotSet();
+            $this->is_writable = new NotSet();
+            $this->is_uploaded_file = new NotSet();
+            $this->move_uploaded_file = new NotSet();
+            $this->rename = new NotSet();
+            $this->fopen = new NotSet();
+            $this->fstat = new NotSet();
+            $this->ftell = new NotSet();
+            $this->fwrite = new NotSet();
+            $this->fread = new NotSet();
             $this->stream_get_contents = new NotSet();
-    
             $this->preg_match = new NotSet();
             $this->preg_replace_callback = new NotSet();
+            $this->php_sapi_name = new NotSet();
         }
 
-        public NotSet|false|array   $fstat;
-        public NotSet|false|int     $ftell;
-        public NotSet|false|int     $fwrite;
-        public NotSet|false|string  $fread;
-        public NotSet|false|string  $stream_get_contents;
-
-        public NotSet|false|int         $preg_match;
+        public NotSet|bool $is_dir;
+        public NotSet|bool $is_file;
+        public NotSet|bool $is_writable;
+        public NotSet|bool $is_uploaded_file;
+        public NotSet|bool $move_uploaded_file;
+        public NotSet|bool $rename;
+        public mixed $fopen;
+        public NotSet|false|array $fstat;
+        public NotSet|false|int $ftell;
+        public NotSet|false|int $fwrite;
+        public NotSet|false|string $fread;
+        public NotSet|false|string $stream_get_contents;
+        public NotSet|false|int $preg_match;
         public NotSet|null|string|array $preg_replace_callback;
+        public NotSet|false|string $php_sapi_name;
+    }
+}
+
+namespace Colossal\Http
+{
+    use Colossal\NotSet;
+    use Colossal\PhpOverrides;
+
+    function is_dir(string $filename): bool
+    {
+        if (!(PhpOverrides::getInstance()->is_dir instanceof NotSet)) {
+            return PhpOverrides::getInstance()->is_dir;
+        } else {
+            return \is_dir($filename);
+        }
+    }
+
+    function is_file(string $filename): bool
+    {
+        if (!(PhpOverrides::getInstance()->is_file instanceof NotSet)) {
+            return PhpOverrides::getInstance()->is_file;
+        } else {
+            return \is_file($filename);
+        }
+    }
+
+    function is_writable(string $filename): bool
+    {
+        if (!(PhpOverrides::getInstance()->is_writable instanceof NotSet)) {
+            return PhpOverrides::getInstance()->is_writable;
+        } else {
+            return \is_writable($filename);
+        }
+    }
+
+    function is_uploaded_file(string $filename): bool
+    {
+        if (!(PhpOverrides::getInstance()->is_uploaded_file instanceof NotSet)) {
+            return PhpOverrides::getInstance()->is_uploaded_file;
+        } else {
+            return \is_uploaded_file($filename);
+        }
+    }
+
+    function move_uploaded_file(string $from, string $to): bool
+    {
+        if (!(PhpOverrides::getInstance()->move_uploaded_file instanceof NotSet)) {
+            return PhpOverrides::getInstance()->move_uploaded_file;
+        } else {
+            return \move_uploaded_file($from, $to);
+        }
+    }
+
+    function rename(string $from, string $to): bool
+    {
+        if (!(PhpOverrides::getInstance()->rename instanceof NotSet)) {
+            return PhpOverrides::getInstance()->rename;
+        } else {
+            return \rename($from, $to);
+        }
+    }
+
+    function fopen(string $filename, string $mode): mixed
+    {
+        if (
+            !(PhpOverrides::getInstance()->fopen instanceof NotSet) &&
+            (is_bool(PhpOverrides::getInstance()->fopen) || is_resource(PhpOverrides::getInstance()->fopen))
+        ) {
+            return PhpOverrides::getInstance()->fopen;
+        } else {
+            return \fopen($filename, $mode);
+        }
+    }
+
+    function php_sapi_name(): false|string
+    {
+        if (!(PhpOverrides::getInstance()->php_sapi_name instanceof NotSet)) {
+            return PhpOverrides::getInstance()->php_sapi_name;
+        } else {
+            return \php_sapi_name();
+        }
     }
 }
 

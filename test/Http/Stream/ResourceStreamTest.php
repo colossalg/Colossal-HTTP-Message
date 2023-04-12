@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Stream;
 
-use Colossal\PhpOverrides;
 use Colossal\Http\Stream\ResourceStream;
+use Colossal\PhpOverrides;
 use PHPUnit\Framework\TestCase;
 
 /**

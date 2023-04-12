@@ -5,5 +5,5 @@ parameters:
         - test
     excludePaths:
         analyse:
-            - test/ForcedFailures.php
+            - test/PhpOverrides.php
     treatPhpDocTypesAsCertain: false

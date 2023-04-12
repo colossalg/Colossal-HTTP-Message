@@ -10,6 +10,17 @@ use Psr\Http\Message\UploadedFileInterface;
 
 class UploadedFile implements UploadedFileInterface
 {
+    public const UPLOAD_ERR_MAP = [
+        0 => "UPLOAD_ERR_OK",
+        1 => "UPLOAD_ERR_INI_SIZE",
+        2 => "UPLOAD_ERR_FORM_SIZE",
+        3 => "UPLOAD_ERR_PARTIAL",
+        4 => "UPLOAD_ERR_NO_FILE",
+        6 => "UPLOAD_ERR_NO_TMP_DIR",
+        7 => "UPLOAD_ERR_CANT_WRITE",
+        8 => "UPLOAD_ERR_EXTENSION"
+    ];
+
     /**
      * Constructor.
      * @param string $filePath The file name or path for this uploaded file.
@@ -39,12 +50,13 @@ class UploadedFile implements UploadedFileInterface
      */
     public function getStream(): StreamInterface
     {
+        $this->assertNoError();
         $this->assertHasNotMoved();
 
         // Lazy initialization of the stream (first opening of stream, or stream has been closed externally).
         if (is_null($this->stream) || !$this->stream->isReadable()) {
             $resource = fopen($this->filePath, "r");
-            if ($resource === false) {
+            if ($resource === false || !is_resource($resource)) {
                 throw new \RuntimeException("Could not open file path '$this->filePath' for reading.");
             }
             $this->stream = new ResourceStream($resource);
@@ -58,7 +70,12 @@ class UploadedFile implements UploadedFileInterface
      */
     public function moveTo($targetPath): void
     {
+        $this->assertNoError();
         $this->assertHasNotMoved();
+
+        if (!is_string($targetPath)) {
+            throw new \InvalidArgumentException("Argument 'targetpath' must have type string.");
+        }
 
         if (is_dir($targetPath)) {
             throw new \RuntimeException("Path '$targetPath' coincides with existing directory.");
@@ -71,7 +88,7 @@ class UploadedFile implements UploadedFileInterface
             $this->stream->close();
         }
 
-        if (php_sapi_name() === 'cli' || defined('STDIN')) {
+        if (php_sapi_name() === 'cli') {
             if (!rename($this->filePath, $targetPath)) {
                 throw new \RuntimeException("Call to rename() returned false for '$this->filePath'.");
             }
@@ -117,6 +134,14 @@ class UploadedFile implements UploadedFileInterface
     public function getClientMediaType(): null|string
     {
         return $this->clientMediaType;
+    }
+
+    private function assertNoError(): void
+    {
+        if ($this->error !== UPLOAD_ERR_OK) {
+            $errorString = self::UPLOAD_ERR_MAP[$this->error];
+            throw new \RuntimeException("The uploaded file failed with error '$errorString'.");
+        }
     }
 
     private function assertHasNotMoved(): void
