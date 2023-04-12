@@ -170,7 +170,7 @@ final class ResourceStreamTest extends TestCase
         $resourceStream->tell();
     }
 
-    public function testTellThrowsIfFstatFails(): void
+    public function testTellThrowsIfFtellFails(): void
     {
         // Test that the method throws if ftell() fails
         $this->phpOverrides->ftell = false;

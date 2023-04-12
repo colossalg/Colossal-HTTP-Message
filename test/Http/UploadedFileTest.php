@@ -191,7 +191,7 @@ final class UploadedFileTest extends TestCase
         $this->phpOverrides->is_uploaded_file   = true;
         $this->phpOverrides->move_uploaded_file = true;
 
-        // Test that the method throws if the call to move_uploaded_file() fails
+        // Test that the underlying stream is closed if the uploaded file is moved
         $uploadedFile = $this->createUploadedFile("oldFilePath", 0);
         $stream = $uploadedFile->getStream();
         $uploadedFile->moveTo("newFilePath");
