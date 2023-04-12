@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Utilities;
 
-use Colossal\Utilities\ForcedFailuresUtilities;
+use Colossal\PhpOverrides;
 use Colossal\Utilities\Rfc7230;
 use PHPUnit\Framework\TestCase;
 
@@ -16,14 +16,8 @@ final class Rfc7230Test extends TestCase
 {
     public function setUp(): void
     {
-        ForcedFailuresUtilities::reset();
-        $this->forcedFailures = ForcedFailuresUtilities::getInstance();
-    }
-
-    public function assertPreConditions(): void
-    {
-        $this->assertFalse($this->forcedFailures->preg_match);
-        $this->assertFalse($this->forcedFailures->preg_replace_callback);
+        PhpOverrides::reset();
+        $this->phpOverrides = PhpOverrides::getInstance();
     }
 
     public function testIsRequestTargetInOriginForm(): void
@@ -70,7 +64,7 @@ final class Rfc7230Test extends TestCase
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm(""));
 
         // Test when Rfc3986::parseUriInToComponentsFails (preg_match() failing forces this to occur)
-        $this->forcedFailures->preg_match = true;
+        $this->phpOverrides->preg_match = false;
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("http://localhost:8000"));
     }
 
@@ -99,5 +93,5 @@ final class Rfc7230Test extends TestCase
         $this->assertTrue(Rfc7230::isRequestTargetInAsteriskForm("*"));
     }
 
-    private ForcedFailuresUtilities $forcedFailures;
+    private PhpOverrides $phpOverrides;
 }

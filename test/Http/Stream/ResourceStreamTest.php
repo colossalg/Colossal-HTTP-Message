@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Stream;
 
-use Colossal\Http\Stream\ForcedFailures;
+use Colossal\PhpOverrides;
 use Colossal\Http\Stream\ResourceStream;
 use PHPUnit\Framework\TestCase;
 
@@ -17,8 +17,8 @@ final class ResourceStreamTest extends TestCase
 
     public function setUp(): void
     {
-        ForcedFailures::reset();
-        $this->forcedFailures = ForcedFailures::getInstance();
+        PhpOverrides::reset();
+        $this->phpOverrides = PhpOverrides::getInstance();
     }
 
     public function testCreateWithProvidedResourceThrowsForNonResourceArgument(): void
@@ -143,7 +143,7 @@ final class ResourceStreamTest extends TestCase
     public function testGetSizeThrowsIfFstatFails(): void
     {
         // Test that the method throws if fstat() fails
-        $this->forcedFailures->fstat = true;
+        $this->phpOverrides->fstat = false;
         $this->expectExceptionMessage("Call to fstat() failed.");
         $this->createReadWriteResourceStream()->getSize();
     }
@@ -173,7 +173,7 @@ final class ResourceStreamTest extends TestCase
     public function testTellThrowsIfFstatFails(): void
     {
         // Test that the method throws if ftell() fails
-        $this->forcedFailures->ftell = true;
+        $this->phpOverrides->ftell = false;
         $this->expectExceptionMessage("Call to ftell() failed.");
         $this->createReadWriteResourceStream()->tell();
     }
@@ -291,7 +291,7 @@ final class ResourceStreamTest extends TestCase
     public function testWriteThrowsIfFwriteFails(): void
     {
         // Test that the method throws if fwrite() fails
-        $this->forcedFailures->fwrite = true;
+        $this->phpOverrides->fwrite = false;
         $this->expectExceptionMessage("Call to fwrite() failed.");
         $this->createReadWriteResourceStream()->write("Hello World!");
     }
@@ -338,7 +338,7 @@ final class ResourceStreamTest extends TestCase
     public function testReadThrowsIfFreadFails(): void
     {
         // Test that the method throws if fread() fails
-        $this->forcedFailures->fread = true;
+        $this->phpOverrides->fread = false;
         $this->expectExceptionMessage("Call to fread() failed.");
         $this->createReadWriteResourceStream()->read(10);
     }
@@ -372,7 +372,7 @@ final class ResourceStreamTest extends TestCase
     public function testGetContentsThrowsIfStreamGetContentsFails(): void
     {
         // Test that the method throws if fread() fails
-        $this->forcedFailures->stream_get_contents = true;
+        $this->phpOverrides->stream_get_contents = false;
         $this->expectExceptionMessage("Call to stream_get_contents() failed.");
         $this->createReadWriteResourceStream()->getContents();
     }
@@ -422,5 +422,5 @@ final class ResourceStreamTest extends TestCase
         return new ResourceStream($resource);
     }
 
-    private ForcedFailures $forcedFailures;
+    private PhpOverrides $phpOverrides;
 }

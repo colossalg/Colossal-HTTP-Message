@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Utilities;
 
-use Colossal\Utilities\ForcedFailuresUtilities;
+use Colossal\PhpOverrides;
 use Colossal\Utilities\Rfc3986;
 use PHPUnit\Framework\TestCase;
 
@@ -15,8 +15,8 @@ final class Rfc3986Test extends TestCase
 {
     public function setUp(): void
     {
-        ForcedFailuresUtilities::reset();
-        $this->forcedFailures = ForcedFailuresUtilities::getInstance();
+        PhpOverrides::reset();
+        $this->phpOverrides = PhpOverrides::getInstance();
     }
 
     public function testParseUriIntoComponents(): void
@@ -63,7 +63,7 @@ final class Rfc3986Test extends TestCase
     public function testParseUriIntoComponentsThrowsIfPregMatchFails(): void
     {
         // Test that the method throws if preg_match() fails
-        $this->forcedFailures->preg_match = true;
+        $this->phpOverrides->preg_match = false;
         $this->expectException(\InvalidArgumentException::class);
         Rfc3986::parseUriIntoComponents("http://localhost:8080");
     }
@@ -386,7 +386,7 @@ final class Rfc3986Test extends TestCase
     public function testEncodeThrowsIfPregReplaceCallbackFails(): void
     {
         // Test that the method throws if preg_replace_callback() fails
-        $this->forcedFailures->preg_replace_callback = true;
+        $this->phpOverrides->preg_replace_callback = null;
         $this->expectException(\RuntimeException::class);
         Rfc3986::encode("http://localhost:8080");
     }
@@ -526,5 +526,5 @@ final class Rfc3986Test extends TestCase
         }
     }
 
-    private ForcedFailuresUtilities $forcedFailures;
+    private PhpOverrides $phpOverrides;
 }
