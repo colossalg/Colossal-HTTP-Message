@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Utilities\Testing;
+namespace Colossal\Http;
 
 use Colossal\Http\Request;
 use Colossal\Http\Uri;

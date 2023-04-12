@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\Testing;
+namespace Colossal\Http;
 
 use Colossal\Http\Uri;
 use PHPUnit\Framework\TestCase;

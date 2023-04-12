@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Utilities\Testing;
+namespace Colossal\Utilities;
 
+use Colossal\PhpOverrides;
 use Colossal\Utilities\Rfc7230;
 use PHPUnit\Framework\TestCase;
 
@@ -13,6 +14,12 @@ use PHPUnit\Framework\TestCase;
  */
 final class Rfc7230Test extends TestCase
 {
+    public function setUp(): void
+    {
+        PhpOverrides::reset();
+        $this->phpOverrides = PhpOverrides::getInstance();
+    }
+
     public function testIsRequestTargetInOriginForm(): void
     {
         // Test when the request target contains a valid absolute path and a valid query component
@@ -55,6 +62,10 @@ final class Rfc7230Test extends TestCase
 
         // Test when the request target is empty
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm(""));
+
+        // Test when Rfc3986::parseUriInToComponentsFails (preg_match() failing forces this to occur)
+        $this->phpOverrides->preg_match = false;
+        $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("http://localhost:8000"));
     }
 
     public function testIsRequestTargetInAuthorityForm(): void
@@ -81,4 +92,6 @@ final class Rfc7230Test extends TestCase
         // Just for the sake of the code coverage metrics really
         $this->assertTrue(Rfc7230::isRequestTargetInAsteriskForm("*"));
     }
+
+    private PhpOverrides $phpOverrides;
 }

@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\Stream\Testing;
+namespace Colossal\Http\Stream;
 
 use Colossal\Http\Stream\ResourceStream;
+use Colossal\PhpOverrides;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -13,6 +14,12 @@ use PHPUnit\Framework\TestCase;
 final class ResourceStreamTest extends TestCase
 {
     public const ASSERT_INVALID_MESSAGE = "Underlying resource is invalid (has been closed or detached).";
+
+    public function setUp(): void
+    {
+        PhpOverrides::reset();
+        $this->phpOverrides = PhpOverrides::getInstance();
+    }
 
     public function testCreateWithProvidedResourceThrowsForNonResourceArgument(): void
     {
@@ -133,6 +140,14 @@ final class ResourceStreamTest extends TestCase
         $this->assertNull($resourceStream->getSize());
     }
 
+    public function testGetSizeThrowsIfFstatFails(): void
+    {
+        // Test that the method throws if fstat() fails
+        $this->phpOverrides->fstat = false;
+        $this->expectExceptionMessage("Call to fstat() failed.");
+        $this->createReadWriteResourceStream()->getSize();
+    }
+
     public function testTell(): void
     {
         // Test the method for the general use case.
@@ -153,6 +168,14 @@ final class ResourceStreamTest extends TestCase
         $resourceStream->close();
         $this->expectExceptionMessage(self::ASSERT_INVALID_MESSAGE);
         $resourceStream->tell();
+    }
+
+    public function testTellThrowsIfFtellFails(): void
+    {
+        // Test that the method throws if ftell() fails
+        $this->phpOverrides->ftell = false;
+        $this->expectExceptionMessage("Call to ftell() failed.");
+        $this->createReadWriteResourceStream()->tell();
     }
 
     public function testEof(): void
@@ -265,6 +288,14 @@ final class ResourceStreamTest extends TestCase
         $this->createReadOnlyResourceStream()->write("Hello World!");
     }
 
+    public function testWriteThrowsIfFwriteFails(): void
+    {
+        // Test that the method throws if fwrite() fails
+        $this->phpOverrides->fwrite = false;
+        $this->expectExceptionMessage("Call to fwrite() failed.");
+        $this->createReadWriteResourceStream()->write("Hello World!");
+    }
+
     public function testIsReadable(): void
     {
         // Test that the method works for read-only, write-only and read-write resource streams.
@@ -304,6 +335,14 @@ final class ResourceStreamTest extends TestCase
         $this->createWriteOnlyResourceStream()->read(10);
     }
 
+    public function testReadThrowsIfFreadFails(): void
+    {
+        // Test that the method throws if fread() fails
+        $this->phpOverrides->fread = false;
+        $this->expectExceptionMessage("Call to fread() failed.");
+        $this->createReadWriteResourceStream()->read(10);
+    }
+
     public function testGetContents(): void
     {
         // Test the method for the general use case.
@@ -328,6 +367,14 @@ final class ResourceStreamTest extends TestCase
         // Test that the method throws if the underlying stream is not readable.
         $this->expectException(\RuntimeException::class);
         $this->createWriteOnlyResourceStream()->getContents();
+    }
+
+    public function testGetContentsThrowsIfStreamGetContentsFails(): void
+    {
+        // Test that the method throws if fread() fails
+        $this->phpOverrides->stream_get_contents = false;
+        $this->expectExceptionMessage("Call to stream_get_contents() failed.");
+        $this->createReadWriteResourceStream()->getContents();
     }
 
     public function testGetMetadata(): void
@@ -374,4 +421,6 @@ final class ResourceStreamTest extends TestCase
 
         return new ResourceStream($resource);
     }
+
+    private PhpOverrides $phpOverrides;
 }
