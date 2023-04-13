@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Colossal\Http;
 
 use Colossal\Http\UploadedFile;
+use Colossal\NotSet;
 use Colossal\PhpOverrides;
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +22,6 @@ final class UploadedFileTest extends TestCase
     public function setUp(): void
     {
         PhpOverrides::reset();
-        $this->phpOverrides = PhpOverrides::getInstance();
     }
 
     public function createUploadedFile(string $filePath, int $error): UploadedFile
@@ -37,8 +37,7 @@ final class UploadedFileTest extends TestCase
 
     public function createUploadedFileThatHasMoved(): UploadedFile
     {
-        $this->phpOverrides->php_sapi_name = "cli";
-        $this->phpOverrides->rename = true;
+        $this->preparePhpOverridesForMoveToInNonSapiEnv(true);
 
         $uploadedFile = $this->createUploadedFile("oldFilePath", 0);
         $uploadedFile->moveTo("newFilePath");
@@ -68,7 +67,7 @@ final class UploadedFileTest extends TestCase
         if ($resource === false || !is_resource($resource)) {
             throw new \RuntimeException("Call to fopen() failed.");
         }
-        $this->phpOverrides->fopen = $resource;
+        $this->preparePhpOverridesForAttemptToOpenStream($resource);
 
         // Test that the method works in the general case (lazy initialization works, etc.)
         $uploadedFile = $this->createUploadedFile("filePath", 0);
@@ -93,7 +92,7 @@ final class UploadedFileTest extends TestCase
 
     public function testGetStreamThrowsIfFopenFails(): void
     {
-        $this->phpOverrides->fopen = false;
+        $this->preparePhpOverridesForAttemptToOpenStream(false);
 
         // Test that the method fails if the call to fopen() fails
         $this->expectException(\RuntimeException::class);
@@ -123,7 +122,10 @@ final class UploadedFileTest extends TestCase
 
     public function testMoveToThrowsIfTargetPathIsDir(): void
     {
-        $this->phpOverrides->is_dir = true;
+        $this->preparePhpOverridesForMoveOverExistingDirOrUnwritableFile(
+            is_dir: true,
+            is_file: false,
+        );
 
         // Test that the method throws if the target path is a directory
         $this->expectExceptionMessage("Path 'newFilePath' coincides with existing directory.");
@@ -132,9 +134,10 @@ final class UploadedFileTest extends TestCase
 
     public function testMoveToThrowsIfTargetPathIsNonWritable(): void
     {
-        $this->phpOverrides->is_dir         = false;
-        $this->phpOverrides->is_file        = true;
-        $this->phpOverrides->is_writable    = false;
+        $this->preparePhpOverridesForMoveOverExistingDirOrUnwritableFile(
+            is_dir: false,
+            is_file: true,
+        );
 
         // Test that the method throws if the target path is an unwritable file
         $this->expectExceptionMessage("Path 'newFilePath' coincides with existing unwritable file.");
@@ -143,22 +146,19 @@ final class UploadedFileTest extends TestCase
 
     public function testMoveToThrowsIfRenameFailsInNonSapiEnv(): void
     {
-        $this->phpOverrides->is_dir         = false;
-        $this->phpOverrides->is_file        = false;
-        $this->phpOverrides->php_sapi_name  = "cli";
-        $this->phpOverrides->rename         = false;
+        $this->preparePhpOverridesForMoveToInNonSapiEnv(false);
 
         // Test that the method throws if the call to rename() fails
         $this->expectExceptionMessage("Call to rename() returned false for 'oldFilePath'.");
         $this->createUploadedFile("oldFilePath", 0)->moveTo("newFilePath");
     }
 
-    public function testMoveToThrowsIfIsUploadeFileFailsInSapiEnv(): void
+    public function testMoveToThrowsIfIsUploadedFileFailsInSapiEnv(): void
     {
-        $this->phpOverrides->is_dir             = false;
-        $this->phpOverrides->is_file            = false;
-        $this->phpOverrides->php_sapi_name      = "Apache";
-        $this->phpOverrides->is_uploaded_file   = false;
+        $this->preparePhpOverridesForMoveToInSapiEnv(
+            is_uploaded_file: false,
+            move_uploaded_file: false
+        );
 
         // Test that the method throws if the call to is_uploaded_file() fails
         $this->expectExceptionMessage("Call to is_uploaded_file() returned false for 'oldFilePath'.");
@@ -167,11 +167,10 @@ final class UploadedFileTest extends TestCase
 
     public function testMoveToThrowsIfMoveUploadedFileFailsInSapiEnv(): void
     {
-        $this->phpOverrides->is_dir             = false;
-        $this->phpOverrides->is_file            = false;
-        $this->phpOverrides->php_sapi_name      = "Apache";
-        $this->phpOverrides->is_uploaded_file   = true;
-        $this->phpOverrides->move_uploaded_file = false;
+        $this->preparePhpOverridesForMoveToInSapiEnv(
+            is_uploaded_file: true,
+            move_uploaded_file: false
+        );
 
         // Test that the method throws if the call to move_uploaded_file() fails
         $this->expectExceptionMessage("Call to move_uploaded_file() returned false for 'oldFilePath'.");
@@ -184,12 +183,11 @@ final class UploadedFileTest extends TestCase
         if ($resource === false || !is_resource($resource)) {
             throw new \RuntimeException("Call to fopen() failed.");
         }
-        $this->phpOverrides->fopen              = $resource;
-        $this->phpOverrides->is_dir             = false;
-        $this->phpOverrides->is_file            = false;
-        $this->phpOverrides->php_sapi_name      = "Apache";
-        $this->phpOverrides->is_uploaded_file   = true;
-        $this->phpOverrides->move_uploaded_file = true;
+        $this->preparePhpOverridesForMoveToInSapiEnv(
+            is_uploaded_file: true,
+            move_uploaded_file: true,
+            fopen: $resource
+        );
 
         // Test that the underlying stream is closed if the uploaded file is moved
         $uploadedFile = $this->createUploadedFile("oldFilePath", 0);
@@ -198,5 +196,42 @@ final class UploadedFileTest extends TestCase
         $this->assertNull($stream->detach());
     }
 
-    private PhpOverrides $phpOverrides;
+    private function preparePhpOverridesForAttemptToOpenStream(mixed $fopen): void
+    {
+        PhpOverrides::setInstance(new PhpOverrides(fopen: $fopen));
+    }
+
+    private function preparePhpOverridesForMoveOverExistingDirOrUnwritableFile(bool $is_dir, bool $is_file): void
+    {
+        PhpOverrides::setInstance(new PhpOverrides(
+            is_dir: $is_dir,
+            is_file: $is_file,
+            is_writable: false
+        ));
+    }
+
+    private function preparePhpOverridesForMoveToInNonSapiEnv(bool $rename): void
+    {
+        PhpOverrides::setInstance(new PhpOverrides(
+            is_dir: false,
+            is_file: false,
+            php_sapi_name: "cli",
+            rename: $rename
+        ));
+    }
+
+    private function preparePhpOverridesForMoveToInSapiEnv(
+        bool $is_uploaded_file,
+        bool $move_uploaded_file,
+        mixed $fopen = new NotSet()
+    ): void {
+        PhpOverrides::setInstance(new PhpOverrides(
+            fopen: $fopen,
+            is_dir: false,
+            is_file: false,
+            php_sapi_name: "apache",
+            is_uploaded_file: $is_uploaded_file,
+            move_uploaded_file: $move_uploaded_file
+        ));
+    }
 }

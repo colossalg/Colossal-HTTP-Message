@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 namespace Colossal
 {
-    class NotSet
+    final class NotSet
     {
     }
 
@@ -33,53 +33,47 @@ namespace Colossal
     {
         protected static self $instance;
 
-        public static function getInstance(): static
+        public static function getInstance(): self
         {
             if (!isset(self::$instance)) {
-                static::reset();
+                self::reset();
             }
-            return static::$instance;
+            return self::$instance;
+        }
+
+        public static function setInstance(self $instance): void
+        {
+            self::$instance = $instance;
         }
 
         public static function reset(): void
         {
-            static::$instance = new static();
+            self::$instance = new self();
         }
 
-        public function __construct()
-        {
-            $this->is_dir = new NotSet();
-            $this->is_file = new NotSet();
-            $this->is_writable = new NotSet();
-            $this->is_uploaded_file = new NotSet();
-            $this->move_uploaded_file = new NotSet();
-            $this->rename = new NotSet();
-            $this->fopen = new NotSet();
-            $this->fstat = new NotSet();
-            $this->ftell = new NotSet();
-            $this->fwrite = new NotSet();
-            $this->fread = new NotSet();
-            $this->stream_get_contents = new NotSet();
-            $this->preg_match = new NotSet();
-            $this->preg_replace_callback = new NotSet();
-            $this->php_sapi_name = new NotSet();
-        }
+        public function __construct(
+            public NotSet|bool $is_dir = new NotSet(),
+            public NotSet|bool $is_file = new NotSet(),
+            public NotSet|bool $is_writable = new NotSet(),
+            public NotSet|bool $is_uploaded_file = new NotSet(),
+            public NotSet|bool $move_uploaded_file = new NotSet(),
+            public NotSet|bool $rename = new NotSet(),
+            public mixed $fopen = new NotSet(),
+            public NotSet|false|array $fstat = new NotSet(),
+            public NotSet|false|int $ftell = new NotSet(),
+            public NotSet|false|int $fwrite = new NotSet(),
+            public NotSet|false|string $fread = new NotSet(),
+            public NotSet|false|string $stream_get_contents = new NotSet(),
+            public NotSet|false|int $preg_match = new NotSet(),
+            public NotSet|null|string|array $preg_replace_callback = new NotSet(),
+            public NotSet|false|string $php_sapi_name = new NotSet
+        ) {
 
-        public NotSet|bool $is_dir;
-        public NotSet|bool $is_file;
-        public NotSet|bool $is_writable;
-        public NotSet|bool $is_uploaded_file;
-        public NotSet|bool $move_uploaded_file;
-        public NotSet|bool $rename;
-        public mixed $fopen;
-        public NotSet|false|array $fstat;
-        public NotSet|false|int $ftell;
-        public NotSet|false|int $fwrite;
-        public NotSet|false|string $fread;
-        public NotSet|false|string $stream_get_contents;
-        public NotSet|false|int $preg_match;
-        public NotSet|null|string|array $preg_replace_callback;
-        public NotSet|false|string $php_sapi_name;
+            if (!($fopen instanceof NotSet) && !is_bool($fopen) && !is_resource($fopen))
+            {
+                throw new \InvalidArgumentException("The argument 'fopen' must be of type NotSet|bool|resource.");
+            }    
+        }
     }
 }
 
@@ -144,10 +138,7 @@ namespace Colossal\Http
 
     function fopen(string $filename, string $mode): mixed
     {
-        if (
-            !(PhpOverrides::getInstance()->fopen instanceof NotSet) &&
-            (is_bool(PhpOverrides::getInstance()->fopen) || is_resource(PhpOverrides::getInstance()->fopen))
-        ) {
+        if (!(PhpOverrides::getInstance()->fopen instanceof NotSet)) {
             return PhpOverrides::getInstance()->fopen;
         } else {
             return \fopen($filename, $mode);
