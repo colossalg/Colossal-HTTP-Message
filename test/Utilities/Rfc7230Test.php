@@ -17,7 +17,6 @@ final class Rfc7230Test extends TestCase
     public function setUp(): void
     {
         PhpOverrides::reset();
-        $this->phpOverrides = PhpOverrides::getInstance();
     }
 
     public function testIsRequestTargetInOriginForm(): void
@@ -64,7 +63,7 @@ final class Rfc7230Test extends TestCase
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm(""));
 
         // Test when Rfc3986::parseUriInToComponentsFails (preg_match() failing forces this to occur)
-        $this->phpOverrides->preg_match = false;
+        $this->forcePregMatchFailure();
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("http://localhost:8000"));
     }
 
@@ -93,5 +92,8 @@ final class Rfc7230Test extends TestCase
         $this->assertTrue(Rfc7230::isRequestTargetInAsteriskForm("*"));
     }
 
-    private PhpOverrides $phpOverrides;
+    private function forcePregMatchFailure(): void
+    {
+        PhpOverrides::setInstance(new PhpOverrides(preg_match: false));
+    }
 }

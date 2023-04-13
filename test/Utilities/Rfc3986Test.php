@@ -16,7 +16,6 @@ final class Rfc3986Test extends TestCase
     public function setUp(): void
     {
         PhpOverrides::reset();
-        $this->phpOverrides = PhpOverrides::getInstance();
     }
 
     public function testParseUriIntoComponents(): void
@@ -63,7 +62,7 @@ final class Rfc3986Test extends TestCase
     public function testParseUriIntoComponentsThrowsIfPregMatchFails(): void
     {
         // Test that the method throws if preg_match() fails
-        $this->phpOverrides->preg_match = false;
+        $this->forcePregMatchFailure();
         $this->expectException(\InvalidArgumentException::class);
         Rfc3986::parseUriIntoComponents("http://localhost:8080");
     }
@@ -386,7 +385,7 @@ final class Rfc3986Test extends TestCase
     public function testEncodeThrowsIfPregReplaceCallbackFails(): void
     {
         // Test that the method throws if preg_replace_callback() fails
-        $this->phpOverrides->preg_replace_callback = null;
+        $this->forcePregReplaceCallbackFailure();
         $this->expectException(\RuntimeException::class);
         Rfc3986::encode("http://localhost:8080");
     }
@@ -526,5 +525,13 @@ final class Rfc3986Test extends TestCase
         }
     }
 
-    private PhpOverrides $phpOverrides;
+    private function forcePregMatchFailure(): void
+    {
+        PhpOverrides::setInstance(new PhpOverrides(preg_match: false));
+    }
+
+    private function forcePregReplaceCallbackFailure(): void
+    {
+        PhpOverrides::setInstance(new PhpOverrides(preg_replace_callback: null));
+    }
 }
