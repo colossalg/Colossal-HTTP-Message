@@ -8,8 +8,8 @@ use Psr\Http\Message\ResponseInterface;
 
 class Response extends Message implements ResponseInterface
 {
-    public const DEFAULT_STATUS_CODE    = 200;
-    public const DEFAULT_REASON_PHRASES = [
+    public const DEFAULT_STATUS_CODE                = 200;
+    public const VALID_STATUS_CODE_REASON_PHRASES   = [
         100 => "Continue",
         101 => "Switching Protocols",
         200 => "OK",
@@ -58,8 +58,10 @@ class Response extends Message implements ResponseInterface
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->statusCode   = self::DEFAULT_STATUS_CODE;
-        $this->reasonPhrase = self::DEFAULT_REASON_PHRASES[self::DEFAULT_STATUS_CODE];
+        $this->reasonPhrase = self::VALID_STATUS_CODE_REASON_PHRASES[self::DEFAULT_STATUS_CODE];
     }
 
     /**
@@ -98,8 +100,12 @@ class Response extends Message implements ResponseInterface
             throw new \InvalidArgumentException("Argument 'reasonPhrase' must have type string.");
         }
 
-        if ($reasonPhrase === "" && array_key_exists($statusCode, self::DEFAULT_REASON_PHRASES)) {
-            $reasonPhrase = self::DEFAULT_REASON_PHRASES[$statusCode];
+        if (!array_key_exists($statusCode, self::VALID_STATUS_CODE_REASON_PHRASES)) {
+            throw new \InvalidArgumentException("Status code '$statusCode' is not valid.");
+        }
+
+        if ($reasonPhrase === "") {
+            $reasonPhrase = self::VALID_STATUS_CODE_REASON_PHRASES[$statusCode];
         }
 
         $newResponse = clone $this;
