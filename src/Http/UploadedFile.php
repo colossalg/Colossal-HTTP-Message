@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use Colossal\Http\Stream\ResourceStream;
+use Colossal\Http\Stream;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -59,7 +59,7 @@ class UploadedFile implements UploadedFileInterface
             if ($resource === false || !is_resource($resource)) {
                 throw new \RuntimeException("Could not open file path '$this->filePath' for reading.");
             }
-            $this->stream = new ResourceStream($resource);
+            $this->stream = new Stream($resource);
         }
 
         return $this->stream;

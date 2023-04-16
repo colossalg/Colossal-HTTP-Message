@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Colossal\Http;
 
 use Colossal\Http\UploadedFile;
+use Colossal\Http\Testable\NotSet;
 use Colossal\Http\Testable\TestableUploadedFile;
-use Colossal\Utilities\NotSet;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \Colossal\Http\UploadedFile
- * @uses \Colossal\Http\Stream\ResourceStream
+ * @uses \Colossal\Http\Stream
  * @uses \Colossal\Utilities\Rfc3986
  */
 final class UploadedFileTest extends TestCase

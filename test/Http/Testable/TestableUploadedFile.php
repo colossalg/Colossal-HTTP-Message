@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Testable;
 
-use Colossal\Utilities\NotSet;
+use Colossal\Http\Testable\NotSet;
 
 final class TestableUploadedFile extends \Colossal\Http\UploadedFile
 {
@@ -13,18 +13,17 @@ final class TestableUploadedFile extends \Colossal\Http\UploadedFile
         null|int $size,
         int $error,
         null|string $clientFileName,
-        null|string $clientMediaType
+        null|string $clientMediaType,
+        public mixed $fopenOverride = new NotSet(),
+        public NotSet|bool $isDirOverride = new NotSet(),
+        public NotSet|bool $isFileOverride = new NotSet(),
+        public NotSet|bool $isWritableOverride = new NotSet(),
+        public NotSet|string|false $phpSapiNameOverride = new NotSet(),
+        public NotSet|bool $renameOverride = new NotSet(),
+        public NotSet|bool $isUploadedFileOverride = new NotSet(),
+        public NotSet|bool $moveUploadedFileOverride = new NotSet()
     ) {
         parent::__construct($filePath, $size, $error, $clientFileName, $clientMediaType);
-
-        $this->fopenOverride            = new NotSet();
-        $this->isDirOverride            = new NotSet();
-        $this->isFileOverride           = new NotSet();
-        $this->isWritableOverride       = new NotSet();
-        $this->phpSapiNameOverride      = new NotSet();
-        $this->renameOverride           = new NotSet();
-        $this->isUploadedFileOverride   = new NotSet();
-        $this->moveUploadedFileOverride = new NotSet();
     }
 
     protected function fopen(string $filename, string $mode): mixed
@@ -98,13 +97,4 @@ final class TestableUploadedFile extends \Colossal\Http\UploadedFile
             return parent::moveUploadedFile($from, $to);
         }
     }
-
-    public mixed $fopenOverride;
-    public NotSet|bool $isDirOverride;
-    public NotSet|bool $isFileOverride;
-    public NotSet|bool $isWritableOverride;
-    public NotSet|string|false $phpSapiNameOverride;
-    public NotSet|bool $renameOverride;
-    public NotSet|bool $isUploadedFileOverride;
-    public NotSet|bool $moveUploadedFileOverride;
 }

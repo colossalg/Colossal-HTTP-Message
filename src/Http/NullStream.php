@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\Stream;
+namespace Colossal\Http;
 
 use Psr\Http\Message\StreamInterface;
 

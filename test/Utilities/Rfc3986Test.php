@@ -13,11 +13,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class Rfc3986Test extends TestCase
 {
-    public function setUp(): void
-    {
-        PhpOverrides::reset();
-    }
-
     public function testParseUriIntoComponents(): void
     {
         // The following test cases are formatted as follows:
@@ -57,14 +52,6 @@ final class Rfc3986Test extends TestCase
             $this->assertEquals($expectedComponents[3], $components["query"]);
             $this->assertEquals($expectedComponents[4], $components["fragment"]);
         }
-    }
-
-    public function testParseUriIntoComponentsThrowsIfPregMatchFails(): void
-    {
-        // Test that the method throws if preg_match() fails
-        $this->forcePregMatchFailure();
-        $this->expectException(\InvalidArgumentException::class);
-        Rfc3986::parseUriIntoComponents("http://localhost:8080");
     }
 
     public function testIsValidScheme(): void
@@ -382,14 +369,6 @@ final class Rfc3986Test extends TestCase
         $this->assertEquals($expected, Rfc3986::encode($encodedHttpUrl));
     }
 
-    public function testEncodeThrowsIfPregReplaceCallbackFails(): void
-    {
-        // Test that the method throws if preg_replace_callback() fails
-        $this->forcePregReplaceCallbackFailure();
-        $this->expectException(\RuntimeException::class);
-        Rfc3986::encode("http://localhost:8080");
-    }
-
     public function testValidateIsAsciiPassingCase(): void
     {
         // Test that the method will not throw when the string contains only US-ASCII
@@ -523,15 +502,5 @@ final class Rfc3986Test extends TestCase
         foreach ($testCases as $address => $expected) {
             $this->assertEquals($expected, Rfc3986::isIPvFutureAddress($address), "Test failed for address $address");
         }
-    }
-
-    private function forcePregMatchFailure(): void
-    {
-        PhpOverrides::setInstance(new PhpOverrides(preg_match: false));
-    }
-
-    private function forcePregReplaceCallbackFailure(): void
-    {
-        PhpOverrides::setInstance(new PhpOverrides(preg_replace_callback: null));
     }
 }

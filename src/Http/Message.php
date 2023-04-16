@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use Colossal\Http\Stream\NullStream;
+use Colossal\Http\NullStream;
 use Colossal\Utilities\Utilities;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;

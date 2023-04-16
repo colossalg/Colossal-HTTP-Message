@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\Stream;
+namespace Colossal\Http;
 
 use Psr\Http\Message\StreamInterface;
 
-class ResourceStream implements StreamInterface
+class Stream implements StreamInterface
 {
     public const READ_ONLY_MODES    = [
         "r", "rb"
@@ -97,7 +97,7 @@ class ResourceStream implements StreamInterface
             return null;
         }
 
-        $res = fstat($this->resource);
+        $res = $this->fstat();
         if ($res === false) {
             throw new \RuntimeException("Call to fstat() failed.");
         }
@@ -112,7 +112,7 @@ class ResourceStream implements StreamInterface
     {
         $this->assertValid();
 
-        $res = ftell($this->resource);
+        $res = $this->ftell();
         if ($res === false) {
             throw new \RuntimeException("Call to ftell() failed.");
         }
@@ -155,7 +155,10 @@ class ResourceStream implements StreamInterface
             throw new \RuntimeException("Underlying resource is not seekable.");
         }
 
-        fseek($this->resource, $offset, $whence);
+        $res = $this->fseek($offset, $whence);
+        if ($res === -1) {
+            throw new \RuntimeException("Call to fseek() failed.");
+        }
     }
 
     /**
@@ -195,7 +198,7 @@ class ResourceStream implements StreamInterface
             throw new \RuntimeException("Underlying resource is not writable.");
         }
 
-        $res = fwrite($this->resource, $string);
+        $res = $this->fwrite($string);
         if ($res === false) {
             throw new \RuntimeException("Call to fwrite() failed.");
         }
@@ -232,7 +235,7 @@ class ResourceStream implements StreamInterface
             throw new \RuntimeException("Underlying resource is not readable.");
         }
 
-        $res = fread($this->resource, max(0, $length));
+        $res = $this->fread($length);
         if ($res === false) {
             throw new \RuntimeException("Call to fread() failed.");
         }
@@ -251,9 +254,9 @@ class ResourceStream implements StreamInterface
             throw new \RuntimeException("Underlying resource is not readable.");
         }
 
-        $res = stream_get_contents($this->resource, offset: 0);
+        $res = $this->streamGetContents();
         if ($res === false) {
-            throw new \RuntimeException("Call to stream_get_contents() failed.");
+            throw new \RuntimeException("Call to streamGetContents() failed.");
         }
 
         return $res;
@@ -274,6 +277,36 @@ class ResourceStream implements StreamInterface
         }
 
         return $metadata;
+    }
+
+    protected function fstat(): false|array
+    {
+        return \fstat($this->resource);
+    }
+
+    protected function ftell(): false|int
+    {
+        return \ftell($this->resource);
+    }
+
+    protected function fseek(int $offset, int $whence = SEEK_SET): int
+    {
+        return \fseek($this->resource, $offset, $whence);
+    }
+
+    protected function fwrite(string $string): false|int
+    {
+        return \fwrite($this->resource, $string);
+    }
+
+    protected function fread(int $length): false|string
+    {
+        return \fread($this->resource, max(0, $length));
+    }
+
+    protected function streamGetContents(): false|string
+    {
+        return \stream_get_contents($this->resource, offset: 0);
     }
 
     private function assertValid(): void
