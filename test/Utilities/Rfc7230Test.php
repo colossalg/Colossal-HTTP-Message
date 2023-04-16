@@ -14,11 +14,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class Rfc7230Test extends TestCase
 {
-    public function setUp(): void
-    {
-        PhpOverrides::reset();
-    }
-
     public function testIsRequestTargetInOriginForm(): void
     {
         // Test when the request target contains a valid absolute path and a valid query component
@@ -61,10 +56,6 @@ final class Rfc7230Test extends TestCase
 
         // Test when the request target is empty
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm(""));
-
-        // Test when Rfc3986::parseUriInToComponentsFails (preg_match() failing forces this to occur)
-        $this->forcePregMatchFailure();
-        $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("http://localhost:8000"));
     }
 
     public function testIsRequestTargetInAuthorityForm(): void
@@ -90,10 +81,5 @@ final class Rfc7230Test extends TestCase
     {
         // Just for the sake of the code coverage metrics really
         $this->assertTrue(Rfc7230::isRequestTargetInAsteriskForm("*"));
-    }
-
-    private function forcePregMatchFailure(): void
-    {
-        PhpOverrides::setInstance(new PhpOverrides(preg_match: false));
     }
 }

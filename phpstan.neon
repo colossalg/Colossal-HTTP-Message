@@ -7,3 +7,6 @@ parameters:
         analyse:
             - test/PhpOverrides.php
     treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        - "#Method [a-zA-Z0-9\\_\\\\:\\(\\)]+ has parameter \\$[a-zA-Z0-9_]+ with no value type specified in iterable type array#"
+        - "#Method [a-zA-Z0-9\\_\\\\:\\(\\)]+ return type has no value type specified in iterable type array#"

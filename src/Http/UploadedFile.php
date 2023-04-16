@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use Colossal\Http\Stream\ResourceStream;
+use Colossal\Http\Stream;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -55,11 +55,11 @@ class UploadedFile implements UploadedFileInterface
 
         // Lazy initialization of the stream (first opening of stream, or stream has been closed externally).
         if (is_null($this->stream) || !$this->stream->isReadable()) {
-            $resource = fopen($this->filePath, "r");
+            $resource = $this->fopen($this->filePath, "r");
             if ($resource === false || !is_resource($resource)) {
                 throw new \RuntimeException("Could not open file path '$this->filePath' for reading.");
             }
-            $this->stream = new ResourceStream($resource);
+            $this->stream = new Stream($resource);
         }
 
         return $this->stream;
@@ -77,10 +77,10 @@ class UploadedFile implements UploadedFileInterface
             throw new \InvalidArgumentException("Argument 'targetpath' must have type string.");
         }
 
-        if (is_dir($targetPath)) {
+        if ($this->isDir($targetPath)) {
             throw new \RuntimeException("Path '$targetPath' coincides with existing directory.");
         }
-        if (is_file($targetPath) && !is_writable($targetPath)) {
+        if ($this->isFile($targetPath) && !$this->isWritable($targetPath)) {
             throw new \RuntimeException("Path '$targetPath' coincides with existing unwritable file.");
         }
 
@@ -88,16 +88,16 @@ class UploadedFile implements UploadedFileInterface
             $this->stream->close();
         }
 
-        if (php_sapi_name() === 'cli') {
-            if (!rename($this->filePath, $targetPath)) {
+        if ($this->phpSapiName() === 'cli') {
+            if (!$this->rename($this->filePath, $targetPath)) {
                 throw new \RuntimeException("Call to rename() returned false for '$this->filePath'.");
             }
         } else {
-            if (!is_uploaded_file($this->filePath)) {
-                throw new \RuntimeException("Call to is_uploaded_file() returned false for '$this->filePath'.");
+            if (!$this->isUploadedFile($this->filePath)) {
+                throw new \RuntimeException("Call to isUploadedFile() returned false for '$this->filePath'.");
             }
-            if (!move_uploaded_file($this->filePath, $targetPath)) {
-                throw new \RuntimeException("Call to move_uploaded_file() returned false for '$this->filePath'.");
+            if (!$this->moveUploadedFile($this->filePath, $targetPath)) {
+                throw new \RuntimeException("Call to moveUploadedFile() returned false for '$this->filePath'.");
             }
         }
 
@@ -134,6 +134,46 @@ class UploadedFile implements UploadedFileInterface
     public function getClientMediaType(): null|string
     {
         return $this->clientMediaType;
+    }
+
+    protected function fopen(string $filename, string $mode): mixed
+    {
+        return \fopen($filename, $mode);
+    }
+
+    protected function isDir(string $filename): bool
+    {
+        return \is_dir($filename);
+    }
+
+    protected function isFile(string $filename): bool
+    {
+        return \is_file($filename);
+    }
+
+    protected function isWritable(string $filename): bool
+    {
+        return \is_writable($filename);
+    }
+
+    protected function phpSapiName(): string|false
+    {
+        return \php_sapi_name();
+    }
+
+    protected function rename(string $oldname, string $newname): bool
+    {
+        return \rename($oldname, $newname);
+    }
+
+    protected function isUploadedFile(string $filename): bool
+    {
+        return \is_uploaded_file($filename);
+    }
+
+    protected function moveUploadedFile(string $from, string $to): bool
+    {
+        return \move_uploaded_file($from, $to);
     }
 
     private function assertNoError(): void
