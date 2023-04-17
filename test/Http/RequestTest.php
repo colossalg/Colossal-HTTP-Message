@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use Colossal\Http\Request;
-use Colossal\Http\Uri;
+use Colossal\Http\{ Request, Uri };
 use PHPUnit\Framework\TestCase;
 
 /**

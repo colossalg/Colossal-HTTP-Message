@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Colossal\Http;
 
 use Colossal\Http\UploadedFile;
-use Colossal\Http\Testable\NotSet;
-use Colossal\Http\Testable\TestableUploadedFile;
+use Colossal\Http\Testable\{ NotSet, TestableUploadedFile };
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Colossal\Utilities;
 
-use Colossal\PhpOverrides;
 use Colossal\Utilities\Rfc3986;
 use PHPUnit\Framework\TestCase;
 
