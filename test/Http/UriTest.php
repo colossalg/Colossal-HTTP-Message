@@ -289,35 +289,30 @@ final class UriTest extends TestCase
         // detailed in the IUri::__toString() documentation.
         $testCases = [
             // Test each of the individual components on their own (scheme, authority, host, path, query, fragment)
-            "http:"                         => ["http", "", "", "", null, "", "", ""],
-            "http://authority"              => ["http", "", "", "authority", null, "", "", ""],
-            "http:path"                     => ["http", "", "", "", null, "path", "", ""],
-            "http:/path1"                   => ["http", "", "", "", null, "/path1", "", ""],
-            "http:/path2"                   => ["http", "", "", "", null, "//path2", "", ""],
-            "http:?query"                   => ["http", "", "", "", null, "", "query", ""],
-            "http:#fragment"                => ["http", "", "", "", null, "", "", "fragment"],
+            "http:"                                                     => ["http", "", "", "", null, "", "", ""],
+            "http://authority"                                          => ["http", "", "", "authority", null, "", "", ""],
+            "http:path"                                                 => ["http", "", "", "", null, "path", "", ""],
+            "http:/path1"                                               => ["http", "", "", "", null, "/path1", "", ""],
+            "http:/path2"                                               => ["http", "", "", "", null, "//path2", "", ""],
+            "http:?query"                                               => ["http", "", "", "", null, "", "query", ""],
+            "http:#fragment"                                            => ["http", "", "", "", null, "", "", "fragment"],
             // Test some fairly generic looking web URLs
-            "http://localhost:8080"         => ["http", "", "", "localhost", 8080, "", "", ""],
-            "http://localhost:8080/"        => ["http", "", "", "localhost", 8080, "/", "", ""],
-            "http://localhost:8080/index"   => ["http", "", "", "localhost", 8080, "/index", "", ""],
-            "http://localhost:8080/index/"  => ["http", "", "", "localhost", 8080, "/index/", "", ""],
-            "http://localhost:8080/users/1" => ["http", "", "", "localhost", 8080, "/users/1", "", ""],
-            "http://localhost:8080/users?id=1"
-                => ["http", "", "", "localhost", 8080, "users", "id=1", ""],
-            "http://localhost:8080/users?first_name=John&last_name=Doe"
-                => ["http", "", "", "localhost", 8080, "users", "first_name=John&last_name=Doe", ""],
-            "http://localhost:8080/index#title"
-                => ["http", "", "", "localhost", 8080, "index", "", "title"],
-            "http://localhost:8080/users?id=1#profile"
-                => ["http", "", "", "localhost", 8080, "users", "id=1", "profile"],
-            "http://root:password123@localhost:8080/index"
-                => ["http", "root", "password123", "localhost", 8080, "index", "", ""],
-            "http://www.google.com"         => ["http", "", "", "www.google.com", null, "", "", ""],
+            "http://localhost:8080"                                     => ["http", "", "", "localhost", 8080, "", "", ""],
+            "http://localhost:8080/"                                    => ["http", "", "", "localhost", 8080, "/", "", ""],
+            "http://localhost:8080/index"                               => ["http", "", "", "localhost", 8080, "/index", "", ""],
+            "http://localhost:8080/index/"                              => ["http", "", "", "localhost", 8080, "/index/", "", ""],
+            "http://localhost:8080/users/1"                             => ["http", "", "", "localhost", 8080, "/users/1", "", ""],
+            "http://localhost:8080/users?id=1"                          => ["http", "", "", "localhost", 8080, "users", "id=1", ""],
+            "http://localhost:8080/users?first_name=John&last_name=Doe" => ["http", "", "", "localhost", 8080, "users", "first_name=John&last_name=Doe", ""],
+            "http://localhost:8080/index#title"                         => ["http", "", "", "localhost", 8080, "index", "", "title"],
+            "http://localhost:8080/users?id=1#profile"                  => ["http", "", "", "localhost", 8080, "users", "id=1", "profile"],
+            "http://root:password123@localhost:8080/index"              => ["http", "root", "password123", "localhost", 8080, "index", "", ""],
+            "http://www.google.com"                                     => ["http", "", "", "www.google.com", null, "", "", ""],
             // Test the combinations of both authority and path (either on their own are already tested above)
-            "http://authority/path1"        => ["http", "", "", "authority", null, "path1", "", ""],
-            "http://authority/path2"        => ["http", "", "", "authority", null, "/path2", "", ""],
-            "http://authority//path"        => ["http", "", "", "authority", null, "//path", "", ""],
-            "http://authority///path"       => ["http", "", "", "authority", null, "///path", "", ""],
+            "http://authority/path1"                                    => ["http", "", "", "authority", null, "path1", "", ""],
+            "http://authority/path2"                                    => ["http", "", "", "authority", null, "/path2", "", ""],
+            "http://authority//path"                                    => ["http", "", "", "authority", null, "//path", "", ""],
+            "http://authority///path"                                   => ["http", "", "", "authority", null, "///path", "", ""],
         ];
 
         foreach ($testCases as $expected => $components) {

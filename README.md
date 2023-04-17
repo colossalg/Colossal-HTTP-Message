@@ -30,8 +30,8 @@ Run the PHPStan code quality analysis with the following command:
 Run the PHP Code Sniffer code style analysis with the following commands:
 
 ```bash
->> .\vendor\bin\phpcs --standard=PSR12 src
->> .\vendor\bin\phpcs --standard=PSR12 test
+>> .\vendor\bin\phpcs --standard=phpcs.xml src
+>> .\vendor\bin\phpcs --standard=phpcs.xml test
 ```
 
 To fix automatically resolve issues found by PHP Code Sniffer run the following commands:
