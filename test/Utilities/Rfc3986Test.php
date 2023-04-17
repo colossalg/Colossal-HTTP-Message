@@ -25,23 +25,20 @@ final class Rfc3986Test extends TestCase
         //          - [4] => The fragment.
         $testCases = [
             // Test each of the individual components on their own (scheme, authority, host, path, query, fragment)
-            "http:"                         => ["http", null, null, null, null],
-            "http://authority"              => ["http", "authority", null, null, null],
-            "http:path"                     => ["http", null, "path", null, null],
-            "http:?query"                   => ["http", null, null, "query", null],
-            "http:#fragment"                => ["http", null, null, null, "fragment"],
+            "http:"                                                             => ["http", null, null, null, null],
+            "http://authority"                                                  => ["http", "authority", null, null, null],
+            "http:path"                                                         => ["http", null, "path", null, null],
+            "http:?query"                                                       => ["http", null, null, "query", null],
+            "http:#fragment"                                                    => ["http", null, null, null, "fragment"],
             // Test some fairly generic looking web URLs
-            "http://localhost:8080"         => ["http", "localhost:8080", null, null, null],
-            "http://localhost:8080/"        => ["http", "localhost:8080", "/", null, null],
-            "http://localhost:8080/users"   => ["http", "localhost:8080", "/users", null, null],
-            "http://localhost:8080/users/"  => ["http", "localhost:8080", "/users/", null, null],
-            "http://localhost:8080/users/1" => ["http", "localhost:8080", "/users/1", null, null],
-            "http://localhost:8080/users?first_name=John&last_name=Doe"
-                => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", null],
-            "http://localhost:8080/users?first_name=John&last_name=Doe#profile"
-                => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", "profile"],
-            "http://localhost:8080/users#friends"
-                => ["http", "localhost:8080", "/users", null, "friends"]
+            "http://localhost:8080"                                             => ["http", "localhost:8080", null, null, null],
+            "http://localhost:8080/"                                            => ["http", "localhost:8080", "/", null, null],
+            "http://localhost:8080/users"                                       => ["http", "localhost:8080", "/users", null, null],
+            "http://localhost:8080/users/"                                      => ["http", "localhost:8080", "/users/", null, null],
+            "http://localhost:8080/users/1"                                     => ["http", "localhost:8080", "/users/1", null, null],
+            "http://localhost:8080/users?first_name=John&last_name=Doe"         => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", null],
+            "http://localhost:8080/users?first_name=John&last_name=Doe#profile" => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", "profile"],
+            "http://localhost:8080/users#friends"                               => ["http", "localhost:8080", "/users", null, "friends"]
         ];
 
         foreach ($testCases as $uri => $expectedComponents) {
@@ -113,10 +110,7 @@ final class Rfc3986Test extends TestCase
     public function testEncodeUserInfo(): void
     {
         // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
-        $this->assertEquals(
-            "aAzZ09!$&'()*+,;=:%2F%3F%23%5B%5D%40",
-            Rfc3986::encodeUserInfo("aAzZ09!$&'()*+,;=:/?#[]@")
-        );
+        $this->assertEquals("aAzZ09!$&'()*+,;=:%2F%3F%23%5B%5D%40", Rfc3986::encodeUserInfo("aAzZ09!$&'()*+,;=:/?#[]@"));
     }
 
     public function testIsValidHost(): void
@@ -174,7 +168,6 @@ final class Rfc3986Test extends TestCase
         // Test that the method works in some general cases
         $testCases = [
             ""              => true,
-            "%00azAZ09-._~!$&'()*+,;=:@/"   => true,
             "users"         => true,
             "users/"        => true,
             "users/1"       => true,
@@ -185,6 +178,8 @@ final class Rfc3986Test extends TestCase
             "//users/1"     => true,
             "///users/1"    => true,
             "users//1"      => true,
+            // All of the valid characters together
+            "%00azAZ09-._~!$&'()*+,;=:@/"   => true,
             // Invalid characters and percent encodings
             "?"             => false,
             "#"             => false,
@@ -193,7 +188,7 @@ final class Rfc3986Test extends TestCase
             "%A"            => false,
             "%G"            => false,
             "%GA"           => false,
-            "%AG"            => false
+            "%AG"           => false
         ];
 
         foreach ($testCases as $path => $isValid) {
@@ -227,8 +222,9 @@ final class Rfc3986Test extends TestCase
     {
         // Test that the method works in some general cases
         $testCases = [
-            "%00azAZ09-._~!$&'()*+,;=:@/?"  => true,
             "first_name=John&last_name=Doe" => true,
+            // All of the valid characters together
+            "%00azAZ09-._~!$&'()*+,;=:@/?"  => true,
             // Invalid characters and percent encodings
             "#"     => false,
             "["     => false,
@@ -254,8 +250,9 @@ final class Rfc3986Test extends TestCase
     {
         // Test that the method works in some general cases
         $testCases = [
-            "%00azAZ09-._~!$&'()*+,;=:@/?"  => true,
             "index"                         => true,
+            // All of the valid characters together
+            "%00azAZ09-._~!$&'()*+,;=:@/?"  => true,
             // Invalid characters and percent encodings
             "#"     => false,
             "["     => false,

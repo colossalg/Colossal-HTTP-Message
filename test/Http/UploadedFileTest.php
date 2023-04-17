@@ -16,8 +16,8 @@ use PHPUnit\Framework\TestCase;
  */
 final class UploadedFileTest extends TestCase
 {
-    public const UPLOADED_FILE_ERROR_EXCEPTION_MESSAGE = "The uploaded file failed with error 'UPLOAD_ERR_INI_SIZE'.";
-    public const UPLOADED_FILE_HAS_MOVED_EXCEPTION_MESSAGE = "The uploaded file has been previously moved.";
+    public const UPLOADED_FILE_ERROR_EXCEPTION_MESSAGE      = "The uploaded file failed with error 'UPLOAD_ERR_INI_SIZE'.";
+    public const UPLOADED_FILE_HAS_MOVED_EXCEPTION_MESSAGE  = "The uploaded file has been previously moved.";
 
     public function createUploadedFile(string $filePath, int $error): TestableUploadedFile
     {
