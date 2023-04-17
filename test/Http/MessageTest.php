@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use Colossal\Http\Message;
-use Colossal\Http\NullStream;
+use Colossal\Http\{ Message, StreamNull };
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -217,7 +216,7 @@ final class MessageTest extends TestCase
     public function testWithBody(): void
     {
         // Test the general operation of the method
-        $newMessage = $this->message->withBody(new NullStream());
+        $newMessage = $this->message->withBody(new StreamNull());
         $this->assertFalse($this->message->getBody() === $newMessage->getBody());
     }
 }

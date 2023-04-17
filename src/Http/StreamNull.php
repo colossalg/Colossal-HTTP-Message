@@ -9,7 +9,7 @@ use Psr\Http\Message\StreamInterface;
 /**
  * @codeCoverageIgnore
  */
-class NullStream implements StreamInterface
+class StreamNull implements StreamInterface
 {
     /**
      * @see StreamInterface::__toString()
