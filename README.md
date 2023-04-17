@@ -37,6 +37,6 @@ Run the PHP Code Sniffer code style analysis with the following commands:
 To fix automatically resolve issues found by PHP Code Sniffer run the following commands:
 
 ```bash
->> .\vendor\bin\phpcbf --standard=PSR12 src
->> .\vendor\bin\phpcbf --standard=PSR12 test
+>> .\vendor\bin\phpcbf --standard=phpcs.xml src
+>> .\vendor\bin\phpcbf --standard=phpcs.xml test
 ```
