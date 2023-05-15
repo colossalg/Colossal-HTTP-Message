@@ -141,7 +141,6 @@ class Request extends Message implements RequestInterface
         $newRequest = clone $this;
         $newRequest->uri = $uri;
 
-        $hostHeaderLine = $newRequest->getHeaderLine("host");
         if ($uri->getHost() !== "" && !($preserveHost && $newRequest->getHeaderLine("host") !== "")) {
             $newRequest = $newRequest->withHeader("Host", $uri->getHost());
         }
