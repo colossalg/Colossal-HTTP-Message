@@ -27,15 +27,14 @@ class Stream implements StreamInterface
 
     /**
      * Constructor.
-     * @param resource $resource The provided underlying resource.
+     * @param null|resource $resource The provided underlying resource.
      */
     public function __construct($resource)
     {
-        if (!is_resource($resource)) {
+        if (!(is_null($resource) || is_resource($resource))) {
             throw new \InvalidArgumentException("Argument 'resource' must have type resource.");
         }
 
-        $this->valid    = true;
         $this->resource = $resource;
     }
 
@@ -67,12 +66,14 @@ class Stream implements StreamInterface
      */
     public function close(): void
     {
-        if (!$this->valid) {
+        if (is_null($this->resource)) {
             return;
         }
 
-        $this->valid = false;
-        fclose($this->resource);
+        $tmpResource    = $this->resource;
+        $this->resource = null;
+
+        fclose($tmpResource);
     }
 
     /**
@@ -80,12 +81,14 @@ class Stream implements StreamInterface
      */
     public function detach(): mixed
     {
-        if (!$this->valid) {
+        if (is_null($this->resource)) {
             return null;
         }
 
-        $this->valid = false;
-        return $this->resource;
+        $tmpResource    = $this->resource;
+        $this->resource = null;
+
+        return $tmpResource;
     }
 
     /**
@@ -93,7 +96,7 @@ class Stream implements StreamInterface
      */
     public function getSize(): null|int
     {
-        if (!$this->valid) {
+        if (is_null($this->resource)) {
             return null;
         }
 
@@ -125,7 +128,7 @@ class Stream implements StreamInterface
      */
     public function eof(): bool
     {
-        if (!$this->valid) {
+        if (is_null($this->resource)) {
             return true;
         }
 
@@ -137,7 +140,7 @@ class Stream implements StreamInterface
      */
     public function isSeekable(): bool
     {
-        if (!$this->valid) {
+        if (is_null($this->resource)) {
             return false;
         }
 
@@ -174,7 +177,7 @@ class Stream implements StreamInterface
      */
     public function isWritable(): bool
     {
-        if (!$this->valid) {
+        if (is_null($this->resource)) {
             return false;
         }
 
@@ -211,7 +214,7 @@ class Stream implements StreamInterface
      */
     public function isReadable(): bool
     {
-        if (!$this->valid) {
+        if (is_null($this->resource)) {
             return false;
         }
 
@@ -267,7 +270,7 @@ class Stream implements StreamInterface
      */
     public function getMetadata($key = null): mixed
     {
-        if (!$this->valid) {
+        if (is_null($this->resource)) {
             return (is_null($key) ? [] : null);
         }
 
@@ -281,48 +284,43 @@ class Stream implements StreamInterface
 
     protected function fstat(): false|array
     {
-        return \fstat($this->resource);
+        return \fstat($this->resource); // @phpstan-ignore-line
     }
 
     protected function ftell(): false|int
     {
-        return \ftell($this->resource);
+        return \ftell($this->resource); // @phpstan-ignore-line
     }
 
     protected function fseek(int $offset, int $whence = SEEK_SET): int
     {
-        return \fseek($this->resource, $offset, $whence);
+        return \fseek($this->resource, $offset, $whence); // @phpstan-ignore-line
     }
 
     protected function fwrite(string $string): false|int
     {
-        return \fwrite($this->resource, $string);
+        return \fwrite($this->resource, $string); // @phpstan-ignore-line
     }
 
     protected function fread(int $length): false|string
     {
-        return \fread($this->resource, max(0, $length));
+        return \fread($this->resource, max(0, $length)); // @phpstan-ignore-line
     }
 
     protected function streamGetContents(): false|string
     {
-        return \stream_get_contents($this->resource, offset: 0);
+        return \stream_get_contents($this->resource, offset: 0); // @phpstan-ignore-line
     }
 
     private function assertValid(): void
     {
-        if (!$this->valid) {
-            throw new \RuntimeException("Underlying resource is invalid (has been closed or detached).");
+        if (is_null($this->resource)) {
+            throw new \RuntimeException("Underlying resource is invalid (is null, has been closed or is detached).");
         }
     }
 
     /**
-     * @var bool Whether the underlying resource for this stream is valid (has not been closed or detached).
-     */
-    private bool $valid;
-
-    /**
-     * @var resource The underlying resource for this stream (generally php://input or php://temp).
+     * @var null|resource The underlying resource for this stream (generally php://input or php://temp).
      */
     private $resource;
 }

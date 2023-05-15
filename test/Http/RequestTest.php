@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers \Colossal\Http\Request
  * @uses \Colossal\Http\Message
+ * @uses \Colossal\Http\Stream
  * @uses \Colossal\Http\Uri
  * @uses \Colossal\Utilities\Rfc3986
  * @uses \Colossal\Utilities\Rfc7230

@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers \Colossal\Http\Response
  * @uses \Colossal\Http\Message
+ * @uses \Colossal\Http\Stream
  */
 final class ResponseTest extends TestCase
 {

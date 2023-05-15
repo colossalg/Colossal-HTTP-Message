@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class StreamTest extends TestCase
 {
-    public const ASSERT_INVALID_MESSAGE = "Underlying resource is invalid (has been closed or detached).";
+    public const ASSERT_INVALID_MESSAGE = "Underlying resource is invalid (is null, has been closed or is detached).";
 
     public function testCreateWithProvidedResourceThrowsForNonResourceArgument(): void
     {
