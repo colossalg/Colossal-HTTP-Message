@@ -109,6 +109,12 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function withUploadedFiles(array $uploadedFiles): static
     {
+        foreach ($uploadedFiles as $uploadedFile) {
+            if (!($uploadedFile instanceof UploadedFileInterface)) {
+                throw new \InvalidArgumentException("Argument 'uploadedFiles' must have type UploadedFileInterface[].");
+            }
+        }
+
         $newServerRequest = clone $this;
         $newServerRequest->uploadedFiles = $uploadedFiles;
 

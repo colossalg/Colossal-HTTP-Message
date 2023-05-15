@@ -15,7 +15,7 @@ final class StreamTest extends TestCase
 {
     public const ASSERT_INVALID_MESSAGE = "Underlying resource is invalid (is null, has been closed or is detached).";
 
-    public function testCreateWithProvidedResourceThrowsForNonResourceArgument(): void
+    public function testCreateWithProvidedResourceThrowsForNonNullOrResourceArgument(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         new Stream(1); /** @phpstan-ignore-line */
