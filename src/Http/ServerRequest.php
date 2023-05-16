@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http;
 
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UploadedFileInterface;
+use Psr\Http\Message\{ ServerRequestInterface, UploadedFileInterface };
 
 class ServerRequest extends Request implements ServerRequestInterface
 {

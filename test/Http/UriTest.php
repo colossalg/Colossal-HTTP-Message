@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Colossal\Http;
 
 use Colossal\Http\Uri;
+use Colossal\Utilities\Rfc3986;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -215,14 +216,14 @@ final class UriTest extends TestCase
     {
         // Test that the method throws when we try to set a port outside of the TCP/UDP ranges
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withPort(Uri::TCP_LOWER_RANGE - 1);
+        $this->uri->withPort(Rfc3986::TCP_LOWER_PORT_RANGE - 1);
     }
 
     public function testWithPortThrowsWhenViolatesUpperPortBound(): void
     {
         // Test that the method throws when we try to set a port outside of the TCP/UDP ranges
         $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withPort(Uri::TCP_UPPER_RANGE + 1);
+        $this->uri->withPort(Rfc3986::TCP_UPPER_PORT_RANGE + 1);
     }
 
     public function testWithPath(): void

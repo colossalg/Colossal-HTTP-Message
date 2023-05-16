@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Stream;
 
-use Colossal\Http\ServerRequest;
-use Colossal\Http\UploadedFile;
+use Colossal\Http\{ ServerRequest, UploadedFile };
 use PHPUnit\Framework\TestCase;
 
 /**
