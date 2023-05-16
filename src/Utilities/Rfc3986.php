@@ -36,18 +36,66 @@ class Rfc3986
         "-", ".", "_", "~"
     ];
 
+    public const TCP_LOWER_PORT_RANGE = 0;
+    public const TCP_UPPER_PORT_RANGE = 65535;
+
     /**
-     * Parses a well formed URI in to its underlying components.
+     * Determines whether the following URI components are valid as per RFC3986.
      *     - Scheme
-     *     - Authority
+     *     - Authority*
+     *         - User
+     *         - Password
+     *         - Host
+     *         - Port
      *     - Path
      *     - Query
      *     - Fragment
      *
-     * See https://www.rfc-editor.org/rfc/rfc3986#appendix-B
+     * @param array $components The array of URI components to check.
+     * @return bool Whether the entries of $components are valid.
+     */
+    public static function areUriComponentsValid(array $components): bool
+    {
+        $user       = $components["user"];
+        $password   = $components["password"];
+
+        $userInfo = null;
+        if (!is_null($user)) {
+            $userInfo = (is_null($password) ? "$user" : "$user:$password");
+        }
+
+        return (
+            (is_null($components["scheme"])     || self::isValidScheme($components["scheme"])) &&
+            (is_null($userInfo)                 || self::isValidUserInfo($userInfo)) &&
+            (is_null($components["host"])       || self::isValidHost($components["host"])) &&
+            (is_null($components["port"])       || self::isValidPort($components["port"])) &&
+            (is_null($components["path"])       || self::isValidPath($components["path"])) &&
+            (is_null($components["query"])      || self::isValidQuery($components["query"])) &&
+            (is_null($components["fragment"])   || self::isValidFragment($components["fragment"]))
+        );
+    }
+
+    /**
+     * Parses a well formed URI in to its underlying components.
+     *     - Scheme
+     *     - Authority*
+     *         - User
+     *         - Password
+     *         - Host
+     *         - Port
+     *     - Path
+     *     - Query
+     *     - Fragment
+     *
+     * NOTE:
+     * This method assumes that the URI is well formed. To validate that the components
+     * in the returned array are indeed valid, use the corresponding validation methods
+     * (areUriComponentsValid(), etc.).
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#appendix-B for the regex used below.
      *
      * @param string $uri The URI to be parsed.
-     * @return array<null|string> An object containing the URI's underlying components.
+     * @return array<null|string> An array containing the URI's underlying components.
      * @throws \InvalidArgumentException If $uri is not a well formed URI.
      */
     public static function parseUriIntoComponents(string $uri): array
@@ -60,18 +108,59 @@ class Rfc3986
             PREG_UNMATCHED_AS_NULL
         );
         if ($success) {
-            $components = [];
-            $components["scheme"]       = $matches[2];
-            $components["authority"]    = $matches[4];
-            $components["path"]         = $matches[5];
-            $components["query"]        = $matches[7];
-            $components["fragment"]     = $matches[9];
+            $components = [
+                "scheme"    => $matches[2],
+                "user"      => null,
+                "password"  => null,
+                "host"      => null,
+                "port"      => null,
+                "path"      => $matches[5],
+                "query"     => $matches[7],
+                "fragment"  => $matches[9]
+            ];
+
+            $authority = $matches[4];
+            if (!is_null($authority)) {
+                $components = array_merge($components, self::parseAuthorityIntoComponents($authority));
+            }
+
             return $components;
         }
 
         throw new \InvalidArgumentException(
-            "Could not parse URI '$uri' in to components." .
+            "Could not parse URI '$uri' in to components. " .
             "Please check that the URI is well formed as per RFC3986."
+        );
+    }
+
+    private static function parseAuthorityIntoComponents(string $authority): array
+    {
+        $matches = [];
+        $nonReservedAndSubDelims = "a-zA-Z0-9\-._~%!$&'()*+,;=";
+        $userCapture        = "(?<user>[$nonReservedAndSubDelims]*)";
+        $passwordCapture    = "(?<password>[:$nonReservedAndSubDelims]*)";
+        $hostCapture        = "(?<host>\[[:$nonReservedAndSubDelims]*\]|[$nonReservedAndSubDelims]*)";
+        $portCapture        = "(?<port>[0-9]+)";
+        $success = preg_match(
+            "/^($userCapture(\:$passwordCapture)?@)?$hostCapture(\:$portCapture)?$/",
+            $authority,
+            $matches,
+            PREG_UNMATCHED_AS_NULL
+        );
+        if ($success) {
+            $components = [
+                "user"      => $matches["user"],
+                "password"  => $matches["password"],
+                "host"      => $matches["host"],
+                "port"      => $matches["port"]
+            ];
+
+            return $components;
+        }
+
+        throw new \InvalidArgumentException(
+            "Could not parse Authority 'authority' in to components. " .
+            "Please check that the Authority is well formed as per RFC3986."
         );
     }
 
@@ -109,6 +198,24 @@ class Rfc3986
         }
 
         return strtolower($scheme);
+    }
+
+    /**
+     * Determines whether a string represents a valid user-info component as per RFC3986.
+     *
+     * See https://www.rfc-editor.org/rfc/rfc3986#section-3.2.1
+     *
+     * The string is assumed to have already been percent encoded.
+     *
+     * @param string $userInfo The user-info component to check.
+     * @return bool Whether $userInfo represent a valid user-info component.
+     */
+    public static function isValidUserInfo(string $userInfo): bool
+    {
+        return (
+            self::isPercentEncodingValid($userInfo) &&
+            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:]*$/", $userInfo))
+        );
     }
 
     /**
@@ -151,7 +258,7 @@ class Rfc3986
 
         return (
             self::isPercentEncodingValid($host) &&
-            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=]+$/", $host))
+            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=]*$/", $host))
         );
     }
 
@@ -191,7 +298,11 @@ class Rfc3986
      */
     public static function isValidPort(int|string $port): bool
     {
-        return is_int($port) || boolval(preg_match("/^[0-9]+$/", $port));
+        return (
+            (is_int($port) || boolval(preg_match("/^[0-9]+$/", $port))) &&
+            intval($port) >= self::TCP_LOWER_PORT_RANGE                 &&
+            intval($port) <= self::TCP_UPPER_PORT_RANGE
+        );
     }
 
     /**

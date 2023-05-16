@@ -12,41 +12,109 @@ use PHPUnit\Framework\TestCase;
  */
 final class Rfc3986Test extends TestCase
 {
+    public function testAreUriComponentsValid(): void
+    {
+        // The following test cases are formatted as follows:
+        //      - [0] Whether the test should pass/fail.
+        //      - [1] The key of the component to change.
+        //      - [2] The val of the component to change.
+        $testCases = [
+            // Test each of the individual components on their own
+            [true,  "scheme", "http"],
+            [false, "scheme", "1234"],
+            [true,  "user", "root"],
+            [false, "user", "%GG"],
+            [true,  "host", "localhost"],
+            [false, "host", "%GG"],
+            [true,  "port", 8080],
+            [false, "port", -1],
+            [true,  "path", "/users/1"],
+            [false, "path", "%GG"],
+            [true,  "query", "first_name=John&last_name=Doe"],
+            [false, "query", "%GG"],
+            [true,  "fragment", "index"],
+            [false, "fragment", "%GG"]
+        ];
+
+        foreach ($testCases as $testCase) {
+            $components = [
+                "scheme"    => null,
+                "user"      => null,
+                "password"  => null,
+                "host"      => null,
+                "port"      => null,
+                "path"      => null,
+                "query"     => null,
+                "fragment"  => null
+            ];
+
+            $components[$testCase[1]] = $testCase[2];
+
+            $this->assertEquals(
+                $testCase[0],
+                Rfc3986::areUriComponentsValid($components),
+                "Failed for test case '$testCase[1]' = '$testCase[2]'."
+            );
+        }
+    }
+
     public function testParseUriIntoComponents(): void
     {
         // The following test cases are formatted as follows:
         //     - Key    => The uri to be parsed in to its components.
         //     - Value  => The parsed components of the URI:
         //          - [0] => The scheme.
-        //          - [1] => The authority.
-        //          - [2] => The path.
-        //          - [3] => The query.
-        //          - [4] => The fragment.
+        //          - [1] => The user.
+        //          - [2] => The password.
+        //          - [3] => The host.
+        //          - [4] => The port.
+        //          - [5] => The path.
+        //          - [6] => The query.
+        //          - [7] => The fragment.
         $testCases = [
             // Test each of the individual components on their own (scheme, authority, host, path, query, fragment)
-            "http:"                                                             => ["http", null, null, null, null],
-            "http://authority"                                                  => ["http", "authority", null, null, null],
-            "http:path"                                                         => ["http", null, "path", null, null],
-            "http:?query"                                                       => ["http", null, null, "query", null],
-            "http:#fragment"                                                    => ["http", null, null, null, "fragment"],
+            ""                                                                  => [null, null, null, null, null, null, null, null],
+            "http:"                                                             => ["http", null, null, null, null, null, null, null],
+            "http://user:pass@authority:8080"                                   => ["http", "user", "pass", "authority", 8080, null, null, null],
+            "http:path"                                                         => ["http", null, null, null, null, "path", null, null],
+            "http:?query"                                                       => ["http", null, null, null, null, null, "query", null],
+            "http:#fragment"                                                    => ["http", null, null, null, null, null, null, "fragment"],
             // Test some fairly generic looking web URLs
-            "http://localhost:8080"                                             => ["http", "localhost:8080", null, null, null],
-            "http://localhost:8080/"                                            => ["http", "localhost:8080", "/", null, null],
-            "http://localhost:8080/users"                                       => ["http", "localhost:8080", "/users", null, null],
-            "http://localhost:8080/users/"                                      => ["http", "localhost:8080", "/users/", null, null],
-            "http://localhost:8080/users/1"                                     => ["http", "localhost:8080", "/users/1", null, null],
-            "http://localhost:8080/users?first_name=John&last_name=Doe"         => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", null],
-            "http://localhost:8080/users?first_name=John&last_name=Doe#profile" => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", "profile"],
-            "http://localhost:8080/users#friends"                               => ["http", "localhost:8080", "/users", null, "friends"]
+            "http://localhost:8080/"                                            => ["http", null, null, "localhost", 8080, "/", null, null],
+            "http://localhost:8080/users"                                       => ["http", null, null, "localhost", 8080, "/users", null, null],
+            "http://localhost:8080/users/"                                      => ["http", null, null, "localhost", 8080, "/users/", null, null],
+            "http://localhost:8080/users/1"                                     => ["http", null, null, "localhost", 8080, "/users/1", null, null],
+            "http://localhost:8080/users?first_name=John&last_name=Doe"         => ["http", null, null, "localhost", 8080, "/users", "first_name=John&last_name=Doe", null],
+            "http://localhost:8080/users?first_name=John&last_name=Doe#profile" => ["http", null, null, "localhost", 8080, "/users", "first_name=John&last_name=Doe", "profile"],
+            "http://localhost:8080/users#friends"                               => ["http", null, null, "localhost", 8080, "/users", null, "friends"],
+            // Perform some more extensive testing on the authority components.
+            // Indirectly test the private method parseAuthorityIntoComponents().
+            "http://user@"                                                      => ["http", "user", null, "", null, null, null, null],
+            "http://user@host"                                                  => ["http", "user", null, "host", null, null, null, null],
+            "http://user@host:8080"                                             => ["http", "user", null, "host", 8080, null, null, null],
+            "http://user:pass@"                                                 => ["http", "user", "pass", "", null, null, null, null],
+            "http://user:pass@host"                                             => ["http", "user", "pass", "host", null, null, null, null],
+            "http://user:pass@host:8080"                                        => ["http", "user", "pass", "host", 8080, null, null, null],
+            "http://localhost"                                                  => ["http", null, null, "localhost", null, null, null, null],
+            "http://localhost:8080"                                             => ["http", null, null, "localhost", 8080, null, null, null],
+            "http://[A:B:C::]"                                                  => ["http", null, null, "[A:B:C::]", null, null, null, null],
+            "http://[A:B:C::]:8080"                                             => ["http", null, null, "[A:B:C::]", 8080, null, null, null],
         ];
 
         foreach ($testCases as $uri => $expectedComponents) {
-            $components = Rfc3986::parseUriIntoComponents($uri);
-            $this->assertEquals($expectedComponents[0], $components["scheme"]);
-            $this->assertEquals($expectedComponents[1], $components["authority"]);
-            $this->assertEquals($expectedComponents[2], $components["path"]);
-            $this->assertEquals($expectedComponents[3], $components["query"]);
-            $this->assertEquals($expectedComponents[4], $components["fragment"]);
+            try {
+                $components = Rfc3986::parseUriIntoComponents($uri);
+                $this->assertEquals($expectedComponents[0], $components["scheme"]);
+                $this->assertEquals($expectedComponents[1], $components["user"]);
+                $this->assertEquals($expectedComponents[2], $components["password"]);
+                $this->assertEquals($expectedComponents[3], $components["host"]);
+                $this->assertEquals($expectedComponents[4], $components["port"]);
+                $this->assertEquals($expectedComponents[5], $components["path"]);
+                $this->assertEquals($expectedComponents[6], $components["query"]);
+                $this->assertEquals($expectedComponents[7], $components["fragment"]);
+            } catch (\InvalidArgumentException $e) {
+                $this->fail("Parsing failed for uri '$uri'. Error message: $e.");
+            }
         }
     }
 
@@ -106,6 +174,34 @@ final class Rfc3986Test extends TestCase
         Rfc3986::encodeScheme("1");
     }
 
+    public function testIsValidUserInfo(): void
+    {
+        // Test that the method works in some general cases
+        $testCases = [
+            ""                          => true,
+            "user"                      => true,
+            "user:"                     => true,
+            "user:pass"                 => true,
+            ":"                         => true,
+            ":user"                     => true,
+            ":user:pass"                => true,
+            ":user:pas:1:2"             => true,
+            // All of the valid characters together
+            "%00azAZ09-._~!$&'()*+,;="  => true,
+            // Invalid characters and percent encodings
+            "?"                         => false,
+            "#"                         => false,
+            "%A"                        => false,
+            "%G"                        => false,
+            "%GA"                       => false,
+            "%AG"                       => false
+        ];
+
+        foreach ($testCases as $userInfo => $isValid) {
+            $this->assertEquals($isValid, Rfc3986::isValidUserInfo($userInfo));
+        }
+    }
+
     public function testEncodeUserInfo(): void
     {
         // Test that the method correctly encodes each character from the unreserved set, sub delims and gen delims
@@ -116,7 +212,7 @@ final class Rfc3986Test extends TestCase
     {
         // Test that the method works in some general cases
         $testCases = [
-            ""                          => false,
+            ""                          => true,
             "[1:2:3:4:5:6:7:8]"         => true,
             "[v7.1:2:3:4]"              => true,
             "localhost"                 => true,

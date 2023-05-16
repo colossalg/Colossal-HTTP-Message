@@ -14,9 +14,6 @@ class Uri implements UriInterface
         "https" => 443
     ];
 
-    public const TCP_LOWER_RANGE = 0;
-    public const TCP_UPPER_RANGE = 65535;
-
     /**
      * Constructor.
      */
@@ -194,9 +191,9 @@ class Uri implements UriInterface
             throw new \InvalidArgumentException("Argument 'port' must have type null or int.");
         }
         if (!is_null($port)) {
-            if ($port < self::TCP_LOWER_RANGE || self::TCP_UPPER_RANGE < $port) {
+            if (!Rfc3986::isValidPort($port)) {
                 throw new \InvalidArgumentException(
-                    "Argument 'port' must be in range [" . self::TCP_LOWER_RANGE . ", " . self::TCP_UPPER_RANGE . "]."
+                    "Argument 'port' must be in range [" . Rfc3986::TCP_LOWER_PORT_RANGE . ", " . Rfc3986::TCP_UPPER_PORT_RANGE . "]."
                 );
             }
         }
