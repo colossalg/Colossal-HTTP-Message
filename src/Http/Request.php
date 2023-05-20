@@ -72,20 +72,15 @@ class Request extends Message implements RequestInterface
         if (!is_string($requestTarget)) {
             throw new \InvalidArgumentException("Argument 'requestTarget' must have type string.");
         }
-        if (Rfc7230::IsRequestTargetInOriginForm($requestTarget)) {
-            throw new \InvalidArgumentException(
-                "Argument 'requestTarget' is in origin-form. " .
-                "Must be in absolute-form, authority-form or asterisk-form."
-            );
-        }
         if (
+            !Rfc7230::IsRequestTargetInOriginForm($requestTarget)       &&
             !Rfc7230::IsRequestTargetInAbsoluteForm($requestTarget)     &&
             !Rfc7230::IsRequestTargetInAuthorityForm($requestTarget)    &&
             !Rfc7230::IsRequestTargetInAsteriskForm($requestTarget)
         ) {
             throw new \InvalidArgumentException(
                 "Argument 'requestTarget' is in an unrecognised form. " .
-                "Must be in absolute-form, authority-form or asterisk-form."
+                "Must be in origin-form, absolute-form, authority-form or asterisk-form."
             );
         }
 

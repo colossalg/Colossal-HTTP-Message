@@ -63,13 +63,6 @@ final class RequestTest extends TestCase
         $this->request->withRequestTarget(1);
     }
 
-    public function testWithRequestTargetThrowsForOriginForm(): void
-    {
-        // Test that the method throws when the string argument 'requestTarget' is in origin form
-        $this->expectException(\InvalidArgumentException::class);
-        $this->request->withRequestTarget("/path?query=abc");
-    }
-
     public function testWithRequestTargetThrowsForUnrecognisedForm(): void
     {
         // Test that the method throws when the string argument 'requestTarget' is in unrecognised form

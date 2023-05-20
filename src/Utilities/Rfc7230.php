@@ -16,22 +16,26 @@ class Rfc7230
      */
     public static function isRequestTargetInOriginForm(string $requestTarget): bool
     {
-        $matches = [];
-        if (
-            preg_match(
-                "/^(?<path>[^?]+)(?:\?(?<query>[^?]+))?$/",
-                $requestTarget,
-                $matches,
-                PREG_UNMATCHED_AS_NULL
-            )
-        ) {
-            $isPathOk  = !is_null($matches["path"])  && Rfc3986::isValidAbsolutePath($matches["path"]);
-            $isQueryOk =  is_null($matches["query"]) || Rfc3986::isValidQuery($matches["query"]);
+        try {
+            $components = Rfc3986::parseUriIntoComponents($requestTarget);
+            if (!Rfc3986::areUriComponentsValid($components)) {
+                return false;
+            }
 
-            return $isPathOk && $isQueryOk;
+            return (
+                is_null($components["scheme"])      &&
+                is_null($components["user"])        &&
+                is_null($components["pass"])        &&
+                is_null($components["host"])        &&
+                is_null($components["port"])        &&
+                !is_null($components["path"])       &&
+                Rfc3986::isValidAbsolutePath($components["path"]) &&
+                // Query can be null or valid, nothing required here
+                is_null($components["fragment"])
+            );
+        } catch (\InvalidArgumentException) {
+            return false;
         }
-
-        return false;
     }
 
     /**
@@ -44,27 +48,25 @@ class Rfc7230
      */
     public static function isRequestTargetInAbsoluteForm(string $requestTarget): bool
     {
-        $uriComponents = [];
         try {
-            $uriComponents = Rfc3986::parseUriIntoComponents($requestTarget);
+            $components = Rfc3986::parseUriIntoComponents($requestTarget);
+            if (!Rfc3986::areUriComponentsValid($components)) {
+                return false;
+            }
+
+            return (
+                !is_null($components["scheme"]) &&
+                // User can be null or valid, nothing required here
+                // Pass can be null or valid, nothing required here
+                // Host can be null or valid, nothing required here
+                // Port can be null or valid, nothing required here
+                !is_null($components["path"])   &&
+                // Query can be null or valid, nothing required here
+                is_null($components["fragment"])
+            );
         } catch (\InvalidArgumentException) {
             return false;
         }
-
-        $scheme     = $uriComponents["scheme"];
-        $path       = $uriComponents["path"];
-        $query      = $uriComponents["query"];
-        $fragment   = $uriComponents["fragment"];
-
-        // Probably should check the authority here as well.
-        // See definition for heir-part:
-        //      https://www.rfc-editor.org/rfc/rfc3986#section-3
-        $hasValidScheme     = !is_null($scheme)     && Rfc3986::isValidScheme($scheme);
-        $hasValidPath       = !is_null($path)       && Rfc3986::isValidPath($path);
-        $hasValidQuery      =  is_null($query)      || Rfc3986::isValidQuery($query);
-        $hasValidFragment   =  is_null($fragment);
-
-        return $hasValidScheme && $hasValidPath && $hasValidQuery && $hasValidFragment;
     }
 
     /**
@@ -77,15 +79,18 @@ class Rfc7230
      */
     public static function isRequestTargetInAuthorityForm(string $requestTarget): bool
     {
-        $matches = [];
-        if (preg_match("/^(?<host>[^:]+)(?:\:(?<port>[^:]+))?$/", $requestTarget, $matches, PREG_UNMATCHED_AS_NULL)) {
-            $isHostOk = !is_null($matches["host"]) && Rfc3986::isValidHost($matches["host"]);
-            $isPortOk =  is_null($matches["port"]) || Rfc3986::isValidPort($matches["port"]);
+        try {
+            $components = Rfc3986::parseAuthorityIntoComponents($requestTarget);
 
-            return $isHostOk && $isPortOk;
+            return (
+                is_null($components["user"]) &&
+                is_null($components["pass"]) &&
+                !is_null($components["host"]) && Rfc3986::isValidHost($components["host"]) &&
+                !is_null($components["port"]) && Rfc3986::isValidPort($components["port"])
+            );
+        } catch (\InvalidArgumentException) {
+            return false;
         }
-
-        return false;
     }
 
     /**
