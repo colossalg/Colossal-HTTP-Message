@@ -25,7 +25,7 @@ class UriFactory implements UriFactoryInterface
 
         $scheme     = $components["scheme"];
         $user       = $components["user"];
-        $password   = $components["password"];
+        $pass       = $components["pass"];
         $host       = $components["host"];
         $port       = $components["port"];
         $path       = $components["path"];
@@ -34,7 +34,7 @@ class UriFactory implements UriFactoryInterface
 
         $newUri = new Uri();
         $newUri = is_null($scheme)   ? $newUri : $newUri->withScheme($scheme);
-        $newUri = is_null($user)     ? $newUri : $newUri->withUserInfo($user, $password);
+        $newUri = is_null($user)     ? $newUri : $newUri->withUserInfo($user, $pass);
         $newUri = is_null($host)     ? $newUri : $newUri->withHost($host);
         $newUri = is_null($port)     ? $newUri : $newUri->withPort(intval($port));
         $newUri = is_null($path)     ? $newUri : $newUri->withPath($path);

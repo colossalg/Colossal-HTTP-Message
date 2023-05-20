@@ -40,7 +40,7 @@ final class Rfc3986Test extends TestCase
             $components = [
                 "scheme"    => null,
                 "user"      => null,
-                "password"  => null,
+                "pass"      => null,
                 "host"      => null,
                 "port"      => null,
                 "path"      => null,
@@ -64,56 +64,73 @@ final class Rfc3986Test extends TestCase
         //     - Key    => The uri to be parsed in to its components.
         //     - Value  => The parsed components of the URI:
         //          - [0] => The scheme.
-        //          - [1] => The user.
-        //          - [2] => The password.
-        //          - [3] => The host.
-        //          - [4] => The port.
-        //          - [5] => The path.
-        //          - [6] => The query.
-        //          - [7] => The fragment.
+        //          - [1] => The authority.
+        //          - [2] => The path.
+        //          - [3] => The query.
+        //          - [4] => The fragment.
         $testCases = [
             // Test each of the individual components on their own (scheme, authority, host, path, query, fragment)
-            ""                                                                  => [null, null, null, null, null, null, null, null],
-            "http:"                                                             => ["http", null, null, null, null, null, null, null],
-            "http://user:pass@authority:8080"                                   => ["http", "user", "pass", "authority", 8080, null, null, null],
-            "http:path"                                                         => ["http", null, null, null, null, "path", null, null],
-            "http:?query"                                                       => ["http", null, null, null, null, null, "query", null],
-            "http:#fragment"                                                    => ["http", null, null, null, null, null, null, "fragment"],
+            ""                                                                  => [null, null, null, null, null],
+            "http:"                                                             => ["http", null, null, null, null],
+            "http://user:pass@authority:8080"                                   => ["http", "user:pass@authority:8080", null, null, null],
+            "http:path"                                                         => ["http", null, "path", null, null],
+            "http:?query"                                                       => ["http", null, null, "query", null],
+            "http:#fragment"                                                    => ["http", null, null, null, "fragment"],
             // Test some fairly generic looking web URLs
-            "http://localhost:8080/"                                            => ["http", null, null, "localhost", 8080, "/", null, null],
-            "http://localhost:8080/users"                                       => ["http", null, null, "localhost", 8080, "/users", null, null],
-            "http://localhost:8080/users/"                                      => ["http", null, null, "localhost", 8080, "/users/", null, null],
-            "http://localhost:8080/users/1"                                     => ["http", null, null, "localhost", 8080, "/users/1", null, null],
-            "http://localhost:8080/users?first_name=John&last_name=Doe"         => ["http", null, null, "localhost", 8080, "/users", "first_name=John&last_name=Doe", null],
-            "http://localhost:8080/users?first_name=John&last_name=Doe#profile" => ["http", null, null, "localhost", 8080, "/users", "first_name=John&last_name=Doe", "profile"],
-            "http://localhost:8080/users#friends"                               => ["http", null, null, "localhost", 8080, "/users", null, "friends"],
-            // Perform some more extensive testing on the authority components.
-            // Indirectly test the private method parseAuthorityIntoComponents().
-            "http://user@"                                                      => ["http", "user", null, "", null, null, null, null],
-            "http://user@host"                                                  => ["http", "user", null, "host", null, null, null, null],
-            "http://user@host:8080"                                             => ["http", "user", null, "host", 8080, null, null, null],
-            "http://user:pass@"                                                 => ["http", "user", "pass", "", null, null, null, null],
-            "http://user:pass@host"                                             => ["http", "user", "pass", "host", null, null, null, null],
-            "http://user:pass@host:8080"                                        => ["http", "user", "pass", "host", 8080, null, null, null],
-            "http://localhost"                                                  => ["http", null, null, "localhost", null, null, null, null],
-            "http://localhost:8080"                                             => ["http", null, null, "localhost", 8080, null, null, null],
-            "http://[A:B:C::]"                                                  => ["http", null, null, "[A:B:C::]", null, null, null, null],
-            "http://[A:B:C::]:8080"                                             => ["http", null, null, "[A:B:C::]", 8080, null, null, null],
+            "http://localhost:8080/"                                            => ["http", "localhost:8080", "/", null, null],
+            "http://localhost:8080/users"                                       => ["http", "localhost:8080", "/users", null, null],
+            "http://localhost:8080/users/"                                      => ["http", "localhost:8080", "/users/", null, null],
+            "http://localhost:8080/users/1"                                     => ["http", "localhost:8080", "/users/1", null, null],
+            "http://localhost:8080/users?first_name=John&last_name=Doe"         => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", null],
+            "http://localhost:8080/users?first_name=John&last_name=Doe#profile" => ["http", "localhost:8080", "/users", "first_name=John&last_name=Doe", "profile"],
+            "http://localhost:8080/users#friends"                               => ["http", "localhost:8080", "/users", null, "friends"],
         ];
 
         foreach ($testCases as $uri => $expectedComponents) {
             try {
                 $components = Rfc3986::parseUriIntoComponents($uri);
                 $this->assertEquals($expectedComponents[0], $components["scheme"]);
-                $this->assertEquals($expectedComponents[1], $components["user"]);
-                $this->assertEquals($expectedComponents[2], $components["password"]);
-                $this->assertEquals($expectedComponents[3], $components["host"]);
-                $this->assertEquals($expectedComponents[4], $components["port"]);
-                $this->assertEquals($expectedComponents[5], $components["path"]);
-                $this->assertEquals($expectedComponents[6], $components["query"]);
-                $this->assertEquals($expectedComponents[7], $components["fragment"]);
+                $this->assertEquals($expectedComponents[1], $components["authority"]);
+                $this->assertEquals($expectedComponents[2], $components["path"]);
+                $this->assertEquals($expectedComponents[3], $components["query"]);
+                $this->assertEquals($expectedComponents[4], $components["fragment"]);
             } catch (\InvalidArgumentException $e) {
                 $this->fail("Parsing failed for uri '$uri'. Error message: $e.");
+            }
+        }
+    }
+
+    public function testParseAuthorityIntoComponents(): void
+    {
+        // The following test cases are formatted as follows:
+        //     - Key    => The authority to be parsed in to its components.
+        //     - Value  => The parsed components of the authority:
+        //          - [0] => The user.
+        //          - [1] => The pass.
+        //          - [2] => The host.
+        //          - [3] => The port.
+        $testCases = [
+            "user@"                 => ["user", null, "", null],
+            "user@host"             => ["user", null, "host", null],
+            "user@host:8080"        => ["user", null, "host", 8080],
+            "user:pass@"            => ["user", "pass", "", null],
+            "user:pass@host"        => ["user", "pass", "host", null],
+            "user:pass@host:8080"   => ["user", "pass", "host", 8080],
+            "localhost"             => [null, null, "localhost", null],
+            "localhost:8080"        => [null, null, "localhost", 8080],
+            "[A:B:C::]"             => [null, null, "[A:B:C::]", null],
+            "[A:B:C::]:8080"        => [null, null, "[A:B:C::]", 8080]
+        ];
+
+        foreach ($testCases as $authority => $expectedComponents) {
+            try {
+                $components = Rfc3986::parseAuthorityIntoComponents($authority);
+                $this->assertEquals($expectedComponents[0], $components["user"]);
+                $this->assertEquals($expectedComponents[1], $components["pass"]);
+                $this->assertEquals($expectedComponents[2], $components["host"]);
+                $this->assertEquals($expectedComponents[3], $components["port"]);
+            } catch (\InvalidArgumentException $e) {
+                $this->fail("Parsing failed for authority '$authority'. Error message: $e.");
             }
         }
     }

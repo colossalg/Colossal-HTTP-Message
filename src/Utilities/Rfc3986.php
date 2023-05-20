@@ -44,7 +44,7 @@ class Rfc3986
      *     - Scheme
      *     - Authority*
      *         - User
-     *         - Password
+     *         - Pass (password)
      *         - Host
      *         - Port
      *     - Path
@@ -56,12 +56,11 @@ class Rfc3986
      */
     public static function areUriComponentsValid(array $components): bool
     {
-        $user       = $components["user"];
-        $password   = $components["password"];
-
+        $user = $components["user"];
+        $pass = $components["pass"];
         $userInfo = null;
         if (!is_null($user)) {
-            $userInfo = (is_null($password) ? "$user" : "$user:$password");
+            $userInfo = (is_null($pass) ? "$user" : "$user:$pass");
         }
 
         return (
@@ -80,7 +79,7 @@ class Rfc3986
      *     - Scheme
      *     - Authority*
      *         - User
-     *         - Password
+     *         - Pass (password)
      *         - Host
      *         - Port
      *     - Path
@@ -110,8 +109,9 @@ class Rfc3986
         if ($success) {
             $components = [
                 "scheme"    => $matches[2],
+                "authority" => $matches[4],
                 "user"      => null,
-                "password"  => null,
+                "pass"      => null,
                 "host"      => null,
                 "port"      => null,
                 "path"      => $matches[5],
@@ -119,9 +119,8 @@ class Rfc3986
                 "fragment"  => $matches[9]
             ];
 
-            $authority = $matches[4];
-            if (!is_null($authority)) {
-                $components = array_merge($components, self::parseAuthorityIntoComponents($authority));
+            if (!is_null($components["authority"])) {
+                $components = array_merge($components, self::parseAuthorityIntoComponents($components["authority"]));
             }
 
             return $components;
@@ -133,34 +132,51 @@ class Rfc3986
         );
     }
 
-    private static function parseAuthorityIntoComponents(string $authority): array
+    /**
+     * Parses a well formed authority in to its underlying components.
+     *     - User
+     *     - Pass (password)
+     *     - Host
+     *     - Port
+     *
+     * NOTE:
+     * This method assumes that the authority is well formed.
+     * To validate that the components in the returned array are indeed valid,
+     * use the corresponding validation methods:
+     *     - isValidUserInfo()
+     *     - isValidHost()
+     *     - isValidPort()
+     *
+     * @param string $authority The authority to be parsed.
+     * @return array<null|string> An array containing the authority's underlying components.
+     * @throws \InvalidArgumentException If $authority is not a well formed authority.
+     */
+    public static function parseAuthorityIntoComponents(string $authority): array
     {
         $matches = [];
         $nonReservedAndSubDelims = "a-zA-Z0-9\-._~%!$&'()*+,;=";
-        $userCapture        = "(?<user>[$nonReservedAndSubDelims]*)";
-        $passwordCapture    = "(?<password>[:$nonReservedAndSubDelims]*)";
-        $hostCapture        = "(?<host>\[[:$nonReservedAndSubDelims]*\]|[$nonReservedAndSubDelims]*)";
-        $portCapture        = "(?<port>[0-9]+)";
+        $userCapture = "(?<user>[$nonReservedAndSubDelims]*)";
+        $passCapture = "(?<pass>[:$nonReservedAndSubDelims]*)";
+        $hostCapture = "(?<host>\[[:$nonReservedAndSubDelims]*\]|[$nonReservedAndSubDelims]*)";
+        $portCapture = "(?<port>[0-9]+)";
         $success = preg_match(
-            "/^($userCapture(\:$passwordCapture)?@)?$hostCapture(\:$portCapture)?$/",
+            "/^($userCapture(\:$passCapture)?@)?$hostCapture(\:$portCapture)?$/",
             $authority,
             $matches,
             PREG_UNMATCHED_AS_NULL
         );
         if ($success) {
-            $components = [
-                "user"      => $matches["user"],
-                "password"  => $matches["password"],
-                "host"      => $matches["host"],
-                "port"      => $matches["port"]
+            return [
+                "user" => $matches["user"],
+                "pass" => $matches["pass"],
+                "host" => $matches["host"],
+                "port" => $matches["port"]
             ];
-
-            return $components;
         }
 
         throw new \InvalidArgumentException(
-            "Could not parse Authority 'authority' in to components. " .
-            "Please check that the Authority is well formed as per RFC3986."
+            "Could not parse authority 'authority' in to components. " .
+            "Please check that the authority is well formed as per RFC3986."
         );
     }
 

@@ -22,9 +22,6 @@ final class Rfc7230Test extends TestCase
         $this->assertTrue(Rfc7230::isRequestTargetInOriginForm("/path"));
         $this->assertFalse(Rfc7230::isRequestTargetInOriginForm("/path?"));
 
-        // Test when the request target contains a valid absolute path and an invalid query component
-        $this->assertFalse(Rfc7230::isRequestTargetInOriginForm("/path?query=abc#"));
-
         // Test when the request target contains an invalid absolute path and a valid query component
         $this->assertFalse(Rfc7230::isRequestTargetInOriginForm("path?query=abc"));
         $this->assertFalse(Rfc7230::isRequestTargetInOriginForm("//path?query=abc"));
@@ -32,6 +29,12 @@ final class Rfc7230Test extends TestCase
 
         // Test when the request target is empty
         $this->assertFalse(Rfc7230::isRequestTargetInOriginForm(""));
+
+        // Test when the request target contains a valid absolute path and a valid query component
+        // but the scheme, user, pass, host, port or fragment are present
+        $this->assertFalse(Rfc7230::isRequestTargetInOriginForm("http:path?query=abc"));
+        $this->assertFalse(Rfc7230::isRequestTargetInOriginForm("user:pass123@localhost:8080/path?query=abc"));
+        $this->assertFalse(Rfc7230::isRequestTargetInOriginForm("/path?query=abc#frag"));
     }
 
     public function testIsRequestTargetInAbsoluteForm(): void
@@ -63,17 +66,20 @@ final class Rfc7230Test extends TestCase
         $this->assertTrue(Rfc7230::isRequestTargetInAuthorityForm("localhost:8080"));
 
         // Test when the host is present and correct, and the port is absent
-        $this->assertTrue(Rfc7230::isRequestTargetInAuthorityForm("localhost"));
+        $this->assertFalse(Rfc7230::isRequestTargetInAuthorityForm("localhost"));
 
         // Test when the host is present and correct, and the port is present but incorrect
         $this->assertFalse(Rfc7230::isRequestTargetInAuthorityForm("localhost:[]"));
 
-        // Test when the host is present but incorrect
-        $this->assertFalse(Rfc7230::isRequestTargetInAuthorityForm("[]"));
+        // Test when the host is present but incorrect, and the port is present and correct
         $this->assertFalse(Rfc7230::isRequestTargetInAuthorityForm("[]:8080"));
 
         // Test when the request target is empty
         $this->assertFalse(Rfc7230::isRequestTargetInAuthorityForm(""));
+
+        // Test when the host and port components are present and correct
+        // but the user and pass components are present
+        $this->assertFalse(Rfc7230::isRequestTargetInAuthorityForm("root:password123@localhost:8080"));
     }
 
     public function testIsRequestTargetInAsteriskForm(): void
