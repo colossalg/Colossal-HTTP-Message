@@ -198,10 +198,15 @@ final class StreamTest extends TestCase
 
     public function testIsSeekable(): void
     {
-        // Test the method for the general use case.
-        $this->assertFalse($this->createReadOnlyStream()->isSeekable());
-        $this->assertFalse($this->createWriteOnlyStream()->isSeekable());
-        $this->assertTrue($this->createReadWriteStream()->isSeekable());
+        $stream = $this->createReadWriteStream();
+        $stream->streamGetMetaDataOverride = [
+            "seekable"  => false
+        ];
+
+        // Test the method for the general use cases.
+        $this->assertFalse($stream->isSeekable());
+        $stream->streamGetMetaDataOverride["seekable"] = true;
+        $this->assertTrue($stream->isSeekable());
 
         // The method should not throw even if the resource is not valid.
         $stream = $this->createReadWriteStream();
@@ -232,9 +237,14 @@ final class StreamTest extends TestCase
 
     public function testSeekThrowsIfIsSeekableIsFalse(): void
     {
+        $stream = $this->createReadWriteStream();
+        $stream->streamGetMetaDataOverride = [
+            "seekable"  => false
+        ];
+
         // Test that the method throws if the underlying stream is not seekable.
         $this->expectException(\RuntimeException::class);
-        $this->createReadOnlyStream()->seek(0);
+        $stream->seek(0);
     }
 
     public function testSeekThrowsIfFSeekFails(): void
@@ -402,22 +412,24 @@ final class StreamTest extends TestCase
 
     private function createReadOnlyStream(): TestableStream
     {
-        // php://temp is read-write so we use stdin here in the tests for our read-only stream.
-        $resource = fopen("php://stdin", "r");
-        if ($resource === false) {
-            throw new \RuntimeException("Failed to open php://stdin.");
-        }
-        return new TestableStream($resource);
+        $stream = $this->createReadWriteStream();
+        $stream->streamGetMetaDataOverride = [
+            "mode"      => "r",
+            "seekable"  => true
+        ];
+
+        return $stream;
     }
 
     private function createWriteOnlyStream(): TestableStream
     {
-        // php://temp is read-write so we use stdout here in the tests for our write-only stream.
-        $resource = fopen("php://stdout", "w");
-        if ($resource === false) {
-            throw new \RuntimeException("Failed to open php://stdout.");
-        }
-        return new TestableStream($resource);
+        $stream = $this->createReadWriteStream();
+        $stream->streamGetMetaDataOverride = [
+            "mode"      => "w",
+            "seekable"  => true
+        ];
+
+        return $stream;
     }
 
     private function createReadWriteStream(): TestableStream

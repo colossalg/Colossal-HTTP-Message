@@ -55,8 +55,8 @@ final class ServerRequestTest extends TestCase
     {
         // Test that the method works in the general case.
         $uploadedFiles = [
-            new UploadedFile('path1', 100, 0, '', ''),
-            new UploadedFile('path2', 200, 0, '', '')
+            UploadedFile::createFromFile('path1', 100, 0, '', ''),
+            UploadedFile::createFromFile('path2', 200, 0, '', '')
         ];
         $newServerRequest = $this->serverRequest->withUploadedFiles($uploadedFiles);
         $this->assertEquals([], $this->serverRequest->getUploadedFiles());

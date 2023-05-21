@@ -5,15 +5,43 @@ declare(strict_types=1);
 namespace Colossal\Http\Testable;
 
 use Colossal\Http\Testable\NotSet;
+use Psr\Http\Message\StreamInterface;
 
 final class TestableUploadedFile extends \Colossal\Http\UploadedFile
 {
-    public function __construct(
+    public static function createFromFile(
         string $filePath,
         null|int $size,
         int $error,
         null|string $clientFileName,
-        null|string $clientMediaType,
+        null|string $clientMediaType
+    ): self {
+        $newUploadedFile = new self();
+        $newUploadedFile->filePath          = $filePath;
+        $newUploadedFile->size              = $size;
+        $newUploadedFile->error             = $error;
+        $newUploadedFile->clientFileName    = $clientFileName;
+        $newUploadedFile->clientMediaType   = $clientMediaType;
+        return $newUploadedFile;
+    }
+
+    public static function createFromStream(
+        StreamInterface $stream,
+        null|int $size,
+        int $error,
+        null|string $clientFileName,
+        null|string $clientMediaType
+    ): self {
+        $newUploadedFile = new self();
+        $newUploadedFile->stream            = $stream;
+        $newUploadedFile->size              = $size;
+        $newUploadedFile->error             = $error;
+        $newUploadedFile->clientFileName    = $clientFileName;
+        $newUploadedFile->clientMediaType   = $clientMediaType;
+        return $newUploadedFile;
+    }
+
+    private function __construct(
         public mixed $fopenOverride = new NotSet(),
         public NotSet|bool $isDirOverride = new NotSet(),
         public NotSet|bool $isFileOverride = new NotSet(),
@@ -23,7 +51,7 @@ final class TestableUploadedFile extends \Colossal\Http\UploadedFile
         public NotSet|bool $isUploadedFileOverride = new NotSet(),
         public NotSet|bool $moveUploadedFileOverride = new NotSet()
     ) {
-        parent::__construct($filePath, $size, $error, $clientFileName, $clientMediaType);
+        parent::__construct();
     }
 
     protected function fopen(string $filename, string $mode): mixed
