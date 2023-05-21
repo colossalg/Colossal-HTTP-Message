@@ -10,6 +10,7 @@ final class TestableStream extends \Colossal\Http\Stream
 {
     public function __construct(
         mixed $resource,
+        public NotSet|array $streamGetMetaDataOverride = new NotSet(),
         public NotSet|false|array $fstatOverride = new NotSet(),
         public NotSet|false|int $ftellOverride = new NotSet(),
         public NotSet|int $fseekOverride = new NotSet(),
@@ -18,6 +19,15 @@ final class TestableStream extends \Colossal\Http\Stream
         public NotSet|false|string $streamGetContentsOverride = new NotSet()
     ) {
         parent::__construct($resource);
+    }
+
+    protected function streamGetMetaData(): array
+    {
+        if (!($this->streamGetMetaDataOverride instanceof NotSet)) {
+            return $this->streamGetMetaDataOverride;
+        } else {
+            return parent::streamGetMetaData();
+        }
     }
 
     protected function fstat(): false|array

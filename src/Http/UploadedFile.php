@@ -21,27 +21,64 @@ class UploadedFile implements UploadedFileInterface
     ];
 
     /**
-     * Constructor.
+     * Create a new uploaded file from the given file path.
      * @param string $filePath The file name or path for this uploaded file.
      * @param null|int $size The size of this uploaded file.
      * @param int $error The error for this uploaded file.
      * @param null|string $clientFileName The client file name for this uploaded file.
      * @param null|string $clientMediaType The client media type for this uploaded file.
+     * @return self
      */
-    public function __construct(
+    public static function createFromFile(
         string $filePath,
         null|int $size,
         int $error,
         null|string $clientFileName,
         null|string $clientMediaType
-    ) {
+    ): self {
+        $newUploadedFile = new UploadedFile();
+        $newUploadedFile->filePath          = $filePath;
+        $newUploadedFile->size              = $size;
+        $newUploadedFile->error             = $error;
+        $newUploadedFile->clientFileName    = $clientFileName;
+        $newUploadedFile->clientMediaType   = $clientMediaType;
+        return $newUploadedFile;
+    }
+
+    /**
+     * Create a new uploaded file from the given stream.
+     * @param StreamInterface $stream The stream for this uploaded file.
+     * @param null|int $size The size of this uploaded file.
+     * @param int $error The error for this uploaded file.
+     * @param null|string $clientFileName The client file name for this uploaded file.
+     * @param null|string $clientMediaType The client media type for this uploaded file.
+     * @return self
+     */
+    public static function createFromStream(
+        StreamInterface $stream,
+        null|int $size,
+        int $error,
+        null|string $clientFileName,
+        null|string $clientMediaType
+    ): self {
+        $newUploadedFile = new self();
+        $newUploadedFile->stream            = $stream;
+        $newUploadedFile->size              = $size;
+        $newUploadedFile->error             = $error;
+        $newUploadedFile->clientFileName    = $clientFileName;
+        $newUploadedFile->clientMediaType   = $clientMediaType;
+        return $newUploadedFile;
+    }
+
+    protected function __construct()
+    {
         $this->hasMoved         = false;
-        $this->filePath         = $filePath;
+        $this->filePath         = null;
         $this->stream           = null;
-        $this->size             = $size;
-        $this->error            = $error;
-        $this->clientFileName   = $clientFileName;
-        $this->clientMediaType  = $clientMediaType;
+        $this->size             = 0;
+        $this->error            = 0;
+        $this->clientFileName   = "";
+        $this->clientMediaType  = "";
     }
 
     /**
@@ -52,8 +89,11 @@ class UploadedFile implements UploadedFileInterface
         $this->assertNoError();
         $this->assertHasNotMoved();
 
-        // Lazy initialization of the stream (first opening of stream, or stream has been closed externally).
-        if (is_null($this->stream) || !$this->stream->isReadable()) {
+        // Lazy initialization of the stream (if required).
+        if (is_null($this->stream)) {
+            if (is_null($this->filePath)) {
+                throw new \RuntimeException("Could not open file path 'null' for reading.");
+            }
             $resource = $this->fopen($this->filePath, "r");
             if ($resource === false || !is_resource($resource)) {
                 throw new \RuntimeException("Could not open file path '$this->filePath' for reading.");
@@ -83,21 +123,10 @@ class UploadedFile implements UploadedFileInterface
             throw new \RuntimeException("Path '$targetPath' coincides with existing unwritable file.");
         }
 
-        if (!is_null($this->stream)) {
-            $this->stream->close();
-        }
-
-        if ($this->phpSapiName() === 'cli') {
-            if (!$this->rename($this->filePath, $targetPath)) {
-                throw new \RuntimeException("Call to rename() returned false for '$this->filePath'.");
-            }
+        if (!is_null($this->filePath)) {
+            $this->fileMoveTo($targetPath);
         } else {
-            if (!$this->isUploadedFile($this->filePath)) {
-                throw new \RuntimeException("Call to isUploadedFile() returned false for '$this->filePath'.");
-            }
-            if (!$this->moveUploadedFile($this->filePath, $targetPath)) {
-                throw new \RuntimeException("Call to moveUploadedFile() returned false for '$this->filePath'.");
-            }
+            $this->streamMoveTo($targetPath);
         }
 
         $this->hasMoved = true;
@@ -175,6 +204,57 @@ class UploadedFile implements UploadedFileInterface
         return \move_uploaded_file($from, $to);
     }
 
+    private function fileMoveTo(string $targetPath): void
+    {
+        if (is_null($this->filePath)) {
+            throw new \RuntimeException("Call to fileMoveTo() when the filePath is null.");
+        }
+
+        if (!is_null($this->stream)) {
+            $this->stream->close();
+            $this->stream = null;
+        }
+
+        if ($this->phpSapiName() === 'cli') {
+            if (!$this->rename($this->filePath, $targetPath)) {
+                throw new \RuntimeException("Call to rename() returned false for '$this->filePath'.");
+            }
+        } else {
+            if (!$this->isUploadedFile($this->filePath)) {
+                throw new \RuntimeException("Call to isUploadedFile() returned false for '$this->filePath'.");
+            }
+            if (!$this->moveUploadedFile($this->filePath, $targetPath)) {
+                throw new \RuntimeException("Call to moveUploadedFile() returned false for '$this->filePath'.");
+            }
+        }
+    }
+
+    private function streamMoveTo(string $targetPath): void
+    {
+        if (is_null($this->stream)) {
+            throw new \RuntimeException("Call to streamMoveTo() when the stream is null.");
+        }
+        if (!$this->stream->isReadable() || !$this->stream->isSeekable()) {
+            throw new \RuntimeException("Call to streamMoveTo() when the stream is not readable and seekable.");
+        }
+
+        $resource = $this->fopen($targetPath, "w");
+        if ($resource === false || !is_resource($resource)) {
+            throw new \RuntimeException("Could not open file path '$targetPath' for writing.");
+        }
+        $destStream = new Stream($resource);
+
+        $this->stream->rewind();
+        while (!$this->stream->eof()) {
+            $destStream->write($this->stream->read(100 * 1024));
+        }
+
+        $destStream->detach();
+
+        $this->stream->close();
+        $this->stream = null;
+    }
+
     private function assertNoError(): void
     {
         if ($this->error !== UPLOAD_ERR_OK) {
@@ -193,35 +273,35 @@ class UploadedFile implements UploadedFileInterface
     /**
      * @var bool Whether this uploaded file has been moved before.
      */
-    private bool $hasMoved;
+    protected bool $hasMoved;
 
     /**
-     * @var string The file path for this uploaded file.
+     * @var null|string The file path for this uploaded file.
      */
-    private string $filePath;
+    protected null|string $filePath;
 
     /**
      * @var null|StreamInterface The stream for this uploaded file (read-only).
      */
-    private null|StreamInterface $stream;
+    protected null|StreamInterface $stream;
 
     /**
      * @var null|int The size of this uploaded file.
      */
-    private null|int $size;
+    protected null|int $size;
 
     /**
      * @var int The error for this uploaded file.
      */
-    private int $error;
+    protected int $error;
 
     /**
      * @var null|string The client file name for this uploaded file.
      */
-    private null|string $clientFileName;
+    protected null|string $clientFileName;
 
     /**
      * @var null|string The client media type for this uploaded file.
      */
-    private null|string $clientMediaType;
+    protected null|string $clientMediaType;
 }

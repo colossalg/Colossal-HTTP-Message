@@ -274,12 +274,17 @@ class Stream implements StreamInterface
             return (is_null($key) ? [] : null);
         }
 
-        $metadata = stream_get_meta_data($this->resource);
+        $metadata = $this->streamGetMetaData();
         if (!is_null($key)) {
             return (isset($metadata[$key]) ? $metadata[$key] : null);
         }
 
         return $metadata;
+    }
+
+    protected function streamGetMetaData(): array
+    {
+        return \stream_get_meta_data($this->resource); // @phpstan-ignore-line
     }
 
     protected function fstat(): false|array
