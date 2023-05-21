@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Colossal\Http;
 
 use Colossal\Http\UploadedFile;
-use Colossal\Http\Testable\{ NotSet, TestableStream, TestableUploadedFile };
+use Colossal\Http\Testable\{ TestableStream, TestableUploadedFile };
+use Colossal\Utilities\NotSet;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 

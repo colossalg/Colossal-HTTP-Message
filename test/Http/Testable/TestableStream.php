@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Testable;
 
-use Colossal\Http\Testable\NotSet;
+use Colossal\Utilities\NotSet;
 
 final class TestableStream extends \Colossal\Http\Stream
 {

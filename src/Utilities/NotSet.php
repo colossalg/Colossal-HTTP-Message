@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\Testable;
+namespace Colossal\Utilities;
 
 final class NotSet
 {
