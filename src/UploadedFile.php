@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http;
+namespace Colossal\Http\Message;
 
-use Colossal\Http\Stream;
+use Colossal\Http\Message\Stream;
 use Psr\Http\Message\{ StreamInterface, UploadedFileInterface };
 
 class UploadedFile implements UploadedFileInterface

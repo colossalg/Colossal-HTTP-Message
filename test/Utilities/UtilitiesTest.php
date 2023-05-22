@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Utilities;
+namespace Colossal\Http\Message\Utilities;
 
-use Colossal\Utilities\Utilities;
+use Colossal\Http\Message\Utilities\Utilities;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Colossal\Utilities\Utilities
+ * @covers \Colossal\Http\Message\Utilities\Utilities
  */
 final class UtilitiesTest extends TestCase
 {

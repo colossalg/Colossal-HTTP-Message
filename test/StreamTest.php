@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\Stream;
+namespace Colossal\Http\Message;
 
-use Colossal\Http\Stream;
-use Colossal\Http\Testable\TestableStream;
+use Colossal\Http\Message\{ Stream, Testable\TestableStream };
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Colossal\Http\Stream
+ * @covers \Colossal\Http\Message\Stream
  */
 final class StreamTest extends TestCase
 {

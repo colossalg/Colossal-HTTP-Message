@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http;
+namespace Colossal\Http\Message;
 
-use Colossal\Http\Response;
+use Colossal\Http\Message\Response;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Colossal\Http\Response
- * @uses \Colossal\Http\Message
- * @uses \Colossal\Http\Stream
+ * @covers \Colossal\Http\Message\Response
+ * @uses \Colossal\Http\Message\Message
+ * @uses \Colossal\Http\Message\Stream
  */
 final class ResponseTest extends TestCase
 {

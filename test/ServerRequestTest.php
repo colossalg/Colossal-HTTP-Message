@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\Stream;
+namespace Colossal\Http\Message;
 
-use Colossal\Http\{ ServerRequest, UploadedFile };
+use Colossal\Http\Message\{ ServerRequest, UploadedFile };
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Colossal\Http\ServerRequest
- * @uses \Colossal\Http\Message
- * @uses \Colossal\Http\Request
- * @uses \Colossal\Http\Stream
- * @uses \Colossal\Http\UploadedFile
- * @uses \Colossal\Http\Uri
+ * @covers \Colossal\Http\Message\ServerRequest
+ * @uses \Colossal\Http\Message\Message
+ * @uses \Colossal\Http\Message\Request
+ * @uses \Colossal\Http\Message\Stream
+ * @uses \Colossal\Http\Message\UploadedFile
+ * @uses \Colossal\Http\Message\Uri
  */
 final class ServerRequestTest extends TestCase
 {

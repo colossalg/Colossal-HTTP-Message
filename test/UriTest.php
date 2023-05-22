@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http;
+namespace Colossal\Http\Message;
 
-use Colossal\Http\Uri;
-use Colossal\Utilities\Rfc3986;
+use Colossal\Http\Message\{ Uri, Utilities\Rfc3986 };
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Colossal\Http\Uri
- * @uses \Colossal\Utilities\Rfc3986
+ * @covers \Colossal\Http\Message\Uri
+ * @uses \Colossal\Http\Message\Utilities\Rfc3986
  */
 final class UriTest extends TestCase
 {

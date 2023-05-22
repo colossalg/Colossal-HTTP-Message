@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Utilities;
+namespace Colossal\Http\Message\Utilities;
 
 class Rfc3986
 {

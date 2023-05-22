@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http;
+namespace Colossal\Http\Message;
 
-use Colossal\Http\Stream;
-use Colossal\Utilities\Utilities;
+use Colossal\Http\Message\{ Stream, Utilities\Utilities };
 use Psr\Http\Message\{ MessageInterface, StreamInterface };
 
 class Message implements MessageInterface

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\Testable;
+namespace Colossal\Http\Message\Testable;
 
-use Colossal\Utilities\NotSet;
+use Colossal\Http\Message\{ UploadedFile, Utilities\NotSet };
 use Psr\Http\Message\StreamInterface;
 
-final class TestableUploadedFile extends \Colossal\Http\UploadedFile
+final class TestableUploadedFile extends UploadedFile
 {
     public static function createFromFile(
         string $filePath,

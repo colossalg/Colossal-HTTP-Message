@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\Testable;
+namespace Colossal\Http\Message\Testable;
 
-use Colossal\Utilities\NotSet;
+use Colossal\Http\Message\{ Stream, Utilities\NotSet };
 
-final class TestableStream extends \Colossal\Http\Stream
+final class TestableStream extends Stream
 {
     public function __construct(
         mixed $resource,
