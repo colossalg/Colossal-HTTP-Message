@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http;
+namespace Colossal\Http\Message;
 
-use Colossal\Http\{ Request, Uri };
+use Colossal\Http\Message\{ Request, Uri };
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Colossal\Http\Request
- * @uses \Colossal\Http\Message
- * @uses \Colossal\Http\Stream
- * @uses \Colossal\Http\Uri
- * @uses \Colossal\Utilities\Rfc3986
- * @uses \Colossal\Utilities\Rfc7230
- * @uses \Colossal\Utilities\Utilities
+ * @covers \Colossal\Http\Message\Request
+ * @uses \Colossal\Http\Message\Message
+ * @uses \Colossal\Http\Message\Stream
+ * @uses \Colossal\Http\Message\Uri
+ * @uses \Colossal\Http\Message\Utilities\Rfc3986
+ * @uses \Colossal\Http\Message\Utilities\Rfc7230
+ * @uses \Colossal\Http\Message\Utilities\Utilities
  */
 final class RequestTest extends TestCase
 {

@@ -2,18 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http;
+namespace Colossal\Http\Message;
 
-use Colossal\Http\UploadedFile;
-use Colossal\Http\Testable\{ TestableStream, TestableUploadedFile };
-use Colossal\Utilities\NotSet;
+use Colossal\Http\Message\{
+    UploadedFile,
+    Testable\TestableStream,
+    Testable\TestableUploadedFile,
+    Utilities\NotSet
+};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 
 /**
- * @covers \Colossal\Http\UploadedFile
- * @uses \Colossal\Http\Stream
- * @uses \Colossal\Utilities\Rfc3986
+ * @covers \Colossal\Http\Message\UploadedFile
+ * @uses \Colossal\Http\Message\Stream
+ * @uses \Colossal\Http\Message\Utilities\Rfc3986
  */
 final class UploadedFileTest extends TestCase
 {

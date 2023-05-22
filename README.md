@@ -1,5 +1,5 @@
-# Colossal-HTTP
-An implementation of the PSR-7 and PSR-17 PHP HTTP standardized interfaces.
+# Colossal-HTTP-Message
+An implementation of the PSR-7 standardized interfaces.
 
 ## Development Tips
 

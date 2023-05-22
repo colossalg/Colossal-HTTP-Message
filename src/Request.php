@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http;
+namespace Colossal\Http\Message;
 
-use Colossal\Utilities\Rfc7230;
+use Colossal\Http\Message\Utilities\Rfc7230;
 use Psr\Http\Message\{ RequestInterface, UriInterface };
 
 class Request extends Message implements RequestInterface

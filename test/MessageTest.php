@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http;
+namespace Colossal\Http\Message;
 
-use Colossal\Http\{ Message, Stream };
+use Colossal\Http\Message\{ Message, Stream };
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Colossal\Http\Message
- * @uses \Colossal\Http\Stream
- * @uses \Colossal\Utilities\Utilities
+ * @covers \Colossal\Http\Message\Message
+ * @uses \Colossal\Http\Message\Stream
+ * @uses \Colossal\Http\Message\Utilities\Utilities
  */
 final class MessageTest extends TestCase
 {

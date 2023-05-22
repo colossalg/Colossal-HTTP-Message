@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Utilities;
+namespace Colossal\Http\MessageUtilities;
 
-use Colossal\Utilities\Rfc7230;
+use Colossal\Http\Message\Utilities\Rfc7230;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Colossal\Utilities\Rfc7230
- * @uses \Colossal\Utilities\Rfc3986
+ * @covers \Colossal\Http\Message\Utilities\Rfc7230
+ * @uses \Colossal\Http\Message\Utilities\Rfc3986
  */
 final class Rfc7230Test extends TestCase
 {

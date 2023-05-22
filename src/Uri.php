@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http;
+namespace Colossal\Http\Message;
 
-use Colossal\Utilities\Rfc3986;
+use Colossal\Http\Message\Utilities\Rfc3986;
 use Psr\Http\Message\UriInterface;
 
 class Uri implements UriInterface
