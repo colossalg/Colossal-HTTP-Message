@@ -3,7 +3,7 @@
 namespace Colossal\HttpFactory;
 
 use Colossal\Http\Stream;
-use Psr\Http\Message\{ StreamInterface, StreamFactoryInterface };
+use Psr\Http\Message\{ StreamFactoryInterface, StreamInterface };
 
 class StreamFactory implements StreamFactoryInterface
 {

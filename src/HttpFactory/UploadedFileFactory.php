@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Colossal\HttpFactory;
 
 use Colossal\Http\UploadedFile;
-use Psr\Http\Message\{ StreamInterface, UploadedFileInterface, UploadedFileFactoryInterface };
+use Psr\Http\Message\{ StreamInterface, UploadedFileFactoryInterface, UploadedFileInterface };
 
 class UploadedFileFactory implements UploadedFileFactoryInterface
 {
