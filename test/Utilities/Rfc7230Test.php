@@ -18,9 +18,9 @@ final class Rfc7230Test extends TestCase
         // Test when the request target contains a valid absolute path and a valid query component
         $this->assertTrue(Rfc7230::isRequestTargetInOriginForm("/path?query=abc"));
 
-        // Test when the request target contains a valid absolute path and no query component
+        // Test when the request target contains a valid absolute path and no/empty query component
         $this->assertTrue(Rfc7230::isRequestTargetInOriginForm("/path"));
-        $this->assertFalse(Rfc7230::isRequestTargetInOriginForm("/path?"));
+        $this->assertTrue(Rfc7230::isRequestTargetInOriginForm("/path?"));
 
         // Test when the request target contains an invalid absolute path and a valid query component
         $this->assertFalse(Rfc7230::isRequestTargetInOriginForm("path?query=abc"));
@@ -52,7 +52,7 @@ final class Rfc7230Test extends TestCase
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("http://localhost:8000/users?id=1#frag"));
 
         // Test when either the scheme, path or query components are incorrect
-        $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("Http://localhost:8000/users?username=John_Doe"));
+        $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("1234://localhost:8000/users?username=John_Doe"));
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("http://localhost:8000/invalid[]path?id=1"));
         $this->assertFalse(Rfc7230::isRequestTargetInAbsoluteForm("http://localhost:8000/users?id=1[]"));
 

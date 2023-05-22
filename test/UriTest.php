@@ -20,6 +20,25 @@ final class UriTest extends TestCase
         $this->uri = new Uri();
     }
 
+    public function testCreateUriFromString(): void
+    {
+        $str = "http://root:password123@localhost:8080/users?first_name=John&last_name=Doe#profile";
+
+        // This method is predominantly covered within the tests for Rfc3986 and below.
+        $uri = Uri::createUriFromString($str);
+        $this->assertEquals($str, $uri->__toString());
+    }
+
+    public function testCreateUriFromStringThrowsForStringWhoseComponentsAreNotValid(): void
+    {
+        // Test that the method throws if the parsed components of the URI are not valid.
+        $this->expectExceptionMessage(
+            "The components parsed from the URI are not valid. " .
+            "Please check that the URI is well formed as per RFC3986."
+        );
+        Uri::createUriFromString("%GG");
+    }
+
     public function testGetAuthority(): void
     {
         $doTestCase = function (string $expected, $includes) {

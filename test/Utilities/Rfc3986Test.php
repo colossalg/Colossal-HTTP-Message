@@ -141,15 +141,15 @@ final class Rfc3986Test extends TestCase
         $testCases = [
             ""          => false,
             "http"      => true,
-            "Http"      => false,
-            "HTTP"      => false,
+            "Http"      => true,
+            "HTTP"      => true,
             // Valid characters in various combinations
             "a"         => true,
-            "A"         => false,
+            "A"         => true,
             "z"         => true,
-            "Z"         => false,
+            "Z"         => true,
             "a0"        => true,
-            "aA"        => false,
+            "aA"        => true,
             "+"         => false,
             "-"         => false,
             "."         => false,
@@ -206,8 +206,11 @@ final class Rfc3986Test extends TestCase
             // All of the valid characters together
             "%00azAZ09-._~!$&'()*+,;="  => true,
             // Invalid characters and percent encodings
+            "/"                         => false,
             "?"                         => false,
             "#"                         => false,
+            "["                         => false,
+            "]"                         => false,
             "%A"                        => false,
             "%G"                        => false,
             "%GA"                       => false,
@@ -215,7 +218,7 @@ final class Rfc3986Test extends TestCase
         ];
 
         foreach ($testCases as $userInfo => $isValid) {
-            $this->assertEquals($isValid, Rfc3986::isValidUserInfo($userInfo));
+            $this->assertEquals($isValid, Rfc3986::isValidUserInfo($userInfo), "Failed for case '$userInfo'.");
         }
     }
 
@@ -236,6 +239,7 @@ final class Rfc3986Test extends TestCase
             // All of the valid characters together
             "%00azAZ09-._~!$&'()*+,;="  => true,
             // Invalid characters and percent encodings
+            "/"                         => false,
             "?"                         => false,
             "#"                         => false,
             "%A"                        => false,
@@ -267,7 +271,9 @@ final class Rfc3986Test extends TestCase
             8000    => true,
             "8080"  => true,
             "1.1"   => false,
-            "abc"   => false
+            "abc"   => false,
+            -999999 => false,
+            +999999 => false
         ];
 
         foreach ($testCases as $port => $isValid) {
@@ -334,6 +340,7 @@ final class Rfc3986Test extends TestCase
     {
         // Test that the method works in some general cases
         $testCases = [
+            ""                              => true,
             "first_name=John&last_name=Doe" => true,
             // All of the valid characters together
             "%00azAZ09-._~!$&'()*+,;=:@/?"  => true,
@@ -362,6 +369,7 @@ final class Rfc3986Test extends TestCase
     {
         // Test that the method works in some general cases
         $testCases = [
+            ""                              => true,
             "index"                         => true,
             // All of the valid characters together
             "%00azAZ09-._~!$&'()*+,;=:@/?"  => true,
