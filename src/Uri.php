@@ -292,17 +292,17 @@ class Uri implements UriInterface
     }
 
     /**
-     * @var string The scheme component of the URI (encoded as per RFC 3986).
+     * @var string The scheme component of the URI (encoded as per RFC3986).
      */
     private string $scheme;
 
     /**
-     * @var string The user, forming part of the user info component of the URI (encoded as per RFC 3986).
+     * @var string The user, forming part of the user info component of the URI (encoded as per RFC3986).
      */
     private string $user;
 
     /**
-     * @var string The password, forming part of the user info component of the URI (encoded as per RFC 3986).
+     * @var string The password, forming part of the user info component of the URI (encoded as per RFC3986).
      */
     private string $password;
 

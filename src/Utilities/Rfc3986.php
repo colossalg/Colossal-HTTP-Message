@@ -192,17 +192,17 @@ class Rfc3986
      */
     public static function isValidScheme(string $scheme): bool
     {
-        return boolval(preg_match("/^[a-z][a-z0-9+\-.]*$/", $scheme));
+        return boolval(preg_match("/^[a-zA-Z][a-zA-Z0-9+\-.]*$/", $scheme));
     }
 
     /**
-     * Performs encoding of the scheme component as per RFC 3986.
+     * Performs encoding of the scheme component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.1
      *
      * @param string $scheme The scheme component to encode.
      * @return string $scheme once it has been encoded.
-     * @throws \InvalidArgumentException If $scheme is not valid as per RFC 3986.
+     * @throws \InvalidArgumentException If $scheme is not valid as per RFC3986.
      */
     public static function encodeScheme(string $scheme): string
     {
@@ -235,7 +235,7 @@ class Rfc3986
     }
 
     /**
-     * Performs encoding of the user info component as per RFC 3986.
+     * Performs encoding of the user info component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.2.1
      *
@@ -257,7 +257,7 @@ class Rfc3986
     }
 
     /**
-     * Determines whether a string represents a valid host component as per RFC 3986.
+     * Determines whether a string represents a valid host component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.2.2
      *
@@ -279,7 +279,7 @@ class Rfc3986
     }
 
     /**
-     * Performs encoding of the host component as per RFC 3986.
+     * Performs encoding of the host component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.2.2
      *
@@ -305,7 +305,7 @@ class Rfc3986
     }
 
     /**
-     * Determines whether a string represents a valid port component as per RFC 3986.
+     * Determines whether a string represents a valid port component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.2.3
      *
@@ -322,7 +322,7 @@ class Rfc3986
     }
 
     /**
-     * Determines whether a string represents a valid path component as per RFC 3986.
+     * Determines whether a string represents a valid path component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.3
      *
@@ -340,7 +340,7 @@ class Rfc3986
     }
 
     /**
-     * Determines whether a string represents a valid absolute path component as per RFC 3986.
+     * Determines whether a string represents a valid absolute path component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.3
      *
@@ -359,7 +359,7 @@ class Rfc3986
     }
 
     /**
-     * Performs encoding of the path component as per RFC 3986.
+     * Performs encoding of the path component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.3
      *
@@ -394,12 +394,12 @@ class Rfc3986
     {
         return (
             self::isPercentEncodingValid($query) &&
-            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:@\/?]+$/", $query))
+            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:@\/?]*$/", $query))
         );
     }
 
     /**
-     * Performs encoding of the query component as per RFC 3986.
+     * Performs encoding of the query component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.4
      *
@@ -434,12 +434,12 @@ class Rfc3986
     {
         return (
             self::isPercentEncodingValid($fragment) &&
-            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:@\/?]+$/", $fragment))
+            boolval(preg_match("/^[%a-zA-Z0-9\-._~!$&'()*+,;=:@\/?]*$/", $fragment))
         );
     }
 
     /**
-     * Performs encoding of the fragment component as per RFC 3986.
+     * Performs encoding of the fragment component as per RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-3.5
      *
@@ -461,7 +461,7 @@ class Rfc3986
     }
 
     /**
-     * Performs encoding as per RFC 3986.
+     * Performs encoding as per RFC3986.
      * https://www.rfc-editor.org/rfc/rfc3986
      *
      * For the reserved set (gen-delims and sub-delims) as well as white space:
@@ -478,7 +478,7 @@ class Rfc3986
      *
      * @param string $str The string to encode (must consist of US-ASCII characters).
      * @param array<string> $excludedChars An array of strings representing characters to exclude from encoding.
-     * @return string $str encoded as per RFC 3986.
+     * @return string $str encoded as per RFC3986.
      * @throws \InvalidArgumentException If:
      *      - Any non US-ASCII characters are found within $str.
      *      - Any invalid percent encoded characters are found within $str.
@@ -529,7 +529,7 @@ class Rfc3986
     }
 
     /**
-     * Validates whether all percent encodings of a given string are valid as described by RFC 3986.
+     * Validates whether all percent encodings of a given string are valid as described by RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-2.1
      *
@@ -545,7 +545,7 @@ class Rfc3986
     }
 
     /**
-     * Returns whether all percent encodings of a given string are valid as described by RFC 3986.
+     * Returns whether all percent encodings of a given string are valid as described by RFC3986.
      *
      * See https://www.rfc-editor.org/rfc/rfc3986#section-2.1
      *
