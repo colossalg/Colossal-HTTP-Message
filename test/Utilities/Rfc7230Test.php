@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Colossal\Http\MessageUtilities;
+namespace Colossal\Http\Message\Utilities;
 
-use Colossal\Http\Message\Utilities\Rfc7230;
 use PHPUnit\Framework\TestCase;
 
 /**
