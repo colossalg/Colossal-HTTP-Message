@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Message;
 
-use Colossal\Http\Message\{ Stream, Testable\TestableStream };
+use Colossal\Http\Message\Testable\TestableStream;
 use PHPUnit\Framework\TestCase;
 
 /**

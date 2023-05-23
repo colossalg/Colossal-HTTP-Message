@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Message\Utilities;
 
-use Colossal\Http\Message\Utilities\Utilities;
 use PHPUnit\Framework\TestCase;
 
 /**

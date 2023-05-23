@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Colossal\Http\Message;
 
 use Colossal\Http\Message\{
-    UploadedFile,
     Testable\TestableStream,
     Testable\TestableUploadedFile,
     Utilities\NotSet
