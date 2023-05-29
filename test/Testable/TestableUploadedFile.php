@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Message\Testable;
 
-use Colossal\Http\Message\{ UploadedFile, Utilities\NotSet };
+use Colossal\Http\Message\UploadedFile;
+use Colossal\Http\Message\Utilities\NotSet;
 use Psr\Http\Message\StreamInterface;
 
 final class TestableUploadedFile extends UploadedFile
