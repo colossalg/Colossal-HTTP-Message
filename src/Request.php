@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Colossal\Http\Message;
 
 use Colossal\Http\Message\Utilities\Rfc7230;
-use Psr\Http\Message\{ RequestInterface, UriInterface };
+use Psr\Http\Message\{
+    RequestInterface,
+    UriInterface
+};
 
 class Request extends Message implements RequestInterface
 {

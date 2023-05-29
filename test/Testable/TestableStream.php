@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Message\Testable;
 
-use Colossal\Http\Message\{ Stream, Utilities\NotSet };
+use Colossal\Http\Message\Stream;
+use Colossal\Http\Message\Utilities\NotSet;
 
 final class TestableStream extends Stream
 {

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Message;
 
-use Psr\Http\Message\{ StreamInterface, UploadedFileInterface };
+use Psr\Http\Message\{
+    StreamInterface,
+    UploadedFileInterface
+};
 
 class UploadedFile implements UploadedFileInterface
 {

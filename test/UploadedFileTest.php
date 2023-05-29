@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Colossal\Http\Message;
 
-use Colossal\Http\Message\{
-    Testable\TestableStream,
-    Testable\TestableUploadedFile,
-    Utilities\NotSet
+use Colossal\Http\Message\Testable\{
+    TestableStream,
+    TestableUploadedFile
 };
+use Colossal\Http\Message\Utilities\NotSet;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 
