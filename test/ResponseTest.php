@@ -38,20 +38,6 @@ final class ResponseTest extends TestCase
         $this->assertEquals($reasonPhrases[404], $newResponse->getReasonPhrase());
     }
 
-    public function testWithStatusThrowsForNonIntStatusCodeArgument(): void
-    {
-        // Test that the method throws when we provide it with a non integer value for the argument 'statusCode'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->response->withStatus("404"); /** @phpstan-ignore-line */
-    }
-
-    public function testWithStatusThrowsForNonStringResponseCodeArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'reasonPhrase'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->response->withStatus(404, 404); /** @phpstan-ignore-line */
-    }
-
     public function testWithStatusThrowsForInvalidStatusCode(): void
     {
         // Test that the method throws when we provide it with an invalid value for the argument 'statusCode'

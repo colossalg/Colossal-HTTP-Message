@@ -109,14 +109,10 @@ class UploadedFile implements UploadedFileInterface
     /**
      * @see UploadedFileInterface::moveTo()
      */
-    public function moveTo($targetPath): void
+    public function moveTo(string $targetPath): void
     {
         $this->assertNoError();
         $this->assertHasNotMoved();
-
-        if (!is_string($targetPath)) {
-            throw new \InvalidArgumentException("Argument 'targetpath' must have type string.");
-        }
 
         if ($this->isDir($targetPath)) {
             throw new \RuntimeException("Path '$targetPath' coincides with existing directory.");

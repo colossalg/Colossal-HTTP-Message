@@ -151,7 +151,7 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::getFragment()
      */
-    public function getFragment()
+    public function getFragment(): string
     {
         return $this->fragment;
     }
@@ -159,11 +159,8 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withScheme()
      */
-    public function withScheme($scheme): static
+    public function withScheme(string $scheme): static
     {
-        if (!is_string($scheme)) {
-            throw new \InvalidArgumentException("Argument 'scheme' must have type string.");
-        }
         $validScheme = false;
         foreach (self::SUPPORTED_SCHEMES_AND_DEFAULT_PORTS as $supportedScheme => $_) {
             if (strtolower($scheme) === $supportedScheme) {
@@ -183,15 +180,8 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withUserInfo()
      */
-    public function withUserInfo($user, $password = null): static
+    public function withUserInfo(string $user, null|string $password = null): static
     {
-        if (!is_string($user)) {
-            throw new \InvalidArgumentException("Argument 'user' must have type string.");
-        }
-        if (!is_null($password) && !is_string($password)) {
-            throw new \InvalidArgumentException("Argument 'password' must have type null or string.");
-        }
-
         $newUri = clone $this;
         if ($user !== "") {
             $newUri->user       = Rfc3986::encodeUserInfo($user);
@@ -207,12 +197,8 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withHost()
      */
-    public function withHost($host): static
+    public function withHost(string $host): static
     {
-        if (!is_string($host)) {
-            throw new \InvalidArgumentException("Argument 'host' must have type string.");
-        }
-
         $newUri = clone $this;
         $newUri->host = Rfc3986::encodeHost($host);
 
@@ -222,11 +208,8 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withPort()
      */
-    public function withPort($port): static
+    public function withPort(null|int $port): static
     {
-        if (!is_null($port) && !is_int($port)) {
-            throw new \InvalidArgumentException("Argument 'port' must have type null or int.");
-        }
         if (!is_null($port)) {
             if (!Rfc3986::isValidPort($port)) {
                 throw new \InvalidArgumentException(
@@ -244,12 +227,8 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withPath()
      */
-    public function withPath($path): static
+    public function withPath(string $path): static
     {
-        if (!is_string($path)) {
-            throw new \InvalidArgumentException("Argument 'path' must have type string.");
-        }
-
         $newUri = clone $this;
         $newUri->path = Rfc3986::encodePath($path);
 
@@ -259,12 +238,8 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withQuery()
      */
-    public function withQuery($query): static
+    public function withQuery(string $query): static
     {
-        if (!is_string($query)) {
-            throw new \InvalidArgumentException("Argument 'query' must have type string.");
-        }
-
         $newUri = clone $this;
         $newUri->query = Rfc3986::encodeQuery($query);
 
@@ -274,12 +249,8 @@ class Uri implements UriInterface
     /**
      * @see UriInterface::withFragment()
      */
-    public function withFragment($fragment): static
+    public function withFragment(string $fragment): static
     {
-        if (!is_string($fragment)) {
-            throw new \InvalidArgumentException("Argument 'fragment' must have type string.");
-        }
-
         $newUri = clone $this;
         $newUri->fragment = Rfc3986::encodeFragment($fragment);
 

@@ -150,7 +150,7 @@ class Stream implements StreamInterface
     /**
      * @see StreamInterface::seek()
      */
-    public function seek($offset, $whence = SEEK_SET): void
+    public function seek(int $offset, int $whence = SEEK_SET): void
     {
         $this->assertValid();
 
@@ -193,7 +193,7 @@ class Stream implements StreamInterface
     /**
      * @see StreamInterface::write()
      */
-    public function write($string): int
+    public function write(string $string): int
     {
         $this->assertValid();
 
@@ -230,7 +230,7 @@ class Stream implements StreamInterface
     /**
      * @see StreamInterface::read()
      */
-    public function read($length): string
+    public function read(int $length): string
     {
         $this->assertValid();
 
@@ -268,7 +268,7 @@ class Stream implements StreamInterface
     /**
      * @see StreamInterface::getMetadata()
      */
-    public function getMetadata($key = null): mixed
+    public function getMetadata(null|string $key = null): mixed
     {
         if (is_null($this->resource)) {
             return (is_null($key) ? [] : null);

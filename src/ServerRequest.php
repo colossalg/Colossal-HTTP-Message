@@ -157,12 +157,8 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * @see ServerRequestInterface::getAttribute()
      */
-    public function getAttribute($name, $default = null): mixed
+    public function getAttribute(string $name, $default = null): mixed
     {
-        if (!is_string($name)) {
-            throw new \InvalidArgumentException("Argument 'name' must have type string.");
-        }
-
         if (!array_key_exists($name, $this->attributes)) {
             return $default;
         }
@@ -173,12 +169,8 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * @see ServerRequestInterface::withAttribute()
      */
-    public function withAttribute($name, $value): static
+    public function withAttribute(string $name, $value): static
     {
-        if (!is_string($name)) {
-            throw new \InvalidArgumentException("Argument 'name' must have type string.");
-        }
-
         $newServerRequest = clone $this;
         $newServerRequest->attributes[$name] = $value;
 
@@ -188,12 +180,8 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * @see ServerRequestInterface::withoutAttribute()
      */
-    public function withoutAttribute($name): static
+    public function withoutAttribute(string $name): static
     {
-        if (!is_string($name)) {
-            throw new \InvalidArgumentException("Argument 'name' must have type string.");
-        }
-
         $newServerRequest = clone $this;
         if (isset($newServerRequest->attributes[$name])) {
             unset($newServerRequest->attributes[$name]);

@@ -91,15 +91,8 @@ class Response extends Message implements ResponseInterface
     /**
      * @see ResponseInterface::withStatus()
      */
-    public function withStatus($statusCode, $reasonPhrase = ""): static
+    public function withStatus(int $statusCode, string $reasonPhrase = ""): static
     {
-        if (!is_int($statusCode)) {
-            throw new \InvalidArgumentException("Argument 'statusCode' must have type int.");
-        }
-        if (!is_string($reasonPhrase)) {
-            throw new \InvalidArgumentException("Argument 'reasonPhrase' must have type string.");
-        }
-
         if (!array_key_exists($statusCode, self::VALID_STATUS_CODE_REASON_PHRASES)) {
             throw new \InvalidArgumentException("Status code '$statusCode' is not valid.");
         }

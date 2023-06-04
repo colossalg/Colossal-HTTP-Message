@@ -150,13 +150,6 @@ final class UriTest extends TestCase
         }
     }
 
-    public function testWithSchemeThrowsForNonStringSchemeArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'scheme'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withScheme(1); /** @phpstan-ignore-line */
-    }
-
     public function testWithSchemeThrowsForNonSupportedScheme(): void
     {
         // Test that the method throws an exception when we try to set a non-supported scheme
@@ -182,33 +175,12 @@ final class UriTest extends TestCase
         $this->assertEquals("", $newUri->getUserInfo());
     }
 
-    public function testWithUserInfoThrowsForNonStringUserArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'user'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withUserInfo(1); /** @phpstan-ignore-line */
-    }
-
-    public function testWithUserInfoThrowsForNonNullOrStringPasswordArgument(): void
-    {
-        // Test that the method throws when we provide it with a non null or string value for the argument 'password'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withUserInfo("root", 1); /** @phpstan-ignore-line */
-    }
-
     public function testWithHost(): void
     {
         // Test that the method works in the general case
         $newUri = $this->uri->withHost("localhost");
         $this->assertEquals("", $this->uri->getHost());
         $this->assertEquals("localhost", $newUri->getHost());
-    }
-
-    public function testWithHostThrowsForNonStringHostArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'host'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withHost(1); /** @phpstan-ignore-line */
     }
 
     public function testWithPort(): void
@@ -221,13 +193,6 @@ final class UriTest extends TestCase
 
         $newUri = $newUri->withPort(null);
         $this->assertNull($newUri->getPort());
-    }
-
-    public function testWithPortThrowsForNonIntOrNullPortArgument(): void
-    {
-        // Test that the method throws when we provide it with a non int or null value for the argument 'port'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withPort("1"); /** @phpstan-ignore-line */
     }
 
     public function testWithPortThrowsWhenViolatesLowerPortBound(): void
@@ -252,13 +217,6 @@ final class UriTest extends TestCase
         $this->assertEquals("www.testing.com", $newUri->getPath());
     }
 
-    public function testWithPathThrowsForNonStringPathArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'path'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withPath(1); /** @phpstan-ignore-line */
-    }
-
     public function testWithQuery(): void
     {
         // Test that the method works in the general case
@@ -267,26 +225,12 @@ final class UriTest extends TestCase
         $this->assertEquals("user=root&password=password123", $newUri->getQuery());
     }
 
-    public function testWithQueryThrowsForNonStringQueryArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'query'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withQuery(1); /** @phpstan-ignore-line */
-    }
-
     public function testWithFragment(): void
     {
         // Test that the method works in the general case
         $newUri = $this->uri->withFragment("title");
         $this->assertEquals("", $this->uri->getFragment());
         $this->assertEquals("title", $newUri->getFragment());
-    }
-
-    public function testWithFragmentThrowsForNonStringFragmentArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'fragment'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->uri->withFragment(1); /** @phpstan-ignore-line */
     }
 
     public function testToString(): void
