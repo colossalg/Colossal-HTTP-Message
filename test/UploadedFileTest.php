@@ -106,13 +106,6 @@ final class UploadedFileTest extends TestCase
         $this->createUploadedFileThatHasMoved()->moveTo("newFilePath");
     }
 
-    public function testMoveToThrowsForNonStringTargetPathArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'targetPath'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->createUploadedFile("oldFilePath")->moveTo(1); /** @phpstan-ignore-line */
-    }
-
     public function testMoveToThrowsIfTargetPathIsDir(): void
     {
         // Test that the method throws if the target path is a directory

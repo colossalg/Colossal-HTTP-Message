@@ -111,13 +111,6 @@ final class ServerRequestTest extends TestCase
         $this->assertEquals('C', $newServerRequest->getAttribute('c', 'C'));
     }
 
-    public function testGetAttributeThrowsForNonStringNameArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'name'.
-        $this->expectException(\InvalidArgumentException::class);
-        $this->serverRequest->getAttribute(1, 'a'); // @phpstan-ignore-line
-    }
-
     public function withAttribute(): void
     {
         // Test that the method works in the general case.
@@ -126,13 +119,6 @@ final class ServerRequestTest extends TestCase
             ->withAttribute('b', 'B');
         $this->assertEquals([], $this->serverRequest->getAttributes());
         $this->assertEquals(['a' => 'A', 'b' => 'B'], $newServerRequest->getAttributes());
-    }
-
-    public function testWithAttributeThrowsForNonStringNameArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'name'.
-        $this->expectException(\InvalidArgumentException::class);
-        $this->serverRequest->withAttribute(1, 'a'); // @phpstan-ignore-line
     }
 
     public function testWithoutAttribute(): void
@@ -144,12 +130,5 @@ final class ServerRequestTest extends TestCase
         $newServerRequest = $this->serverRequest->withoutAttribute('b')->withoutAttribute('c');
         $this->assertEquals(['a' => 'A', 'b' => 'B'], $this->serverRequest->getAttributes());
         $this->assertEquals(['a' => 'A'], $newServerRequest->getAttributes());
-    }
-
-    public function testWithoutAttributeThrowsForNonStringNameArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'name'.
-        $this->expectException(\InvalidArgumentException::class);
-        $this->serverRequest->withoutAttribute(1); // @phpstan-ignore-line
     }
 }

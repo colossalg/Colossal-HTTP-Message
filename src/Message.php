@@ -44,11 +44,8 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withProtocolVersion()
      */
-    public function withProtocolVersion($version): static
+    public function withProtocolVersion(string $version): static
     {
-        if (!is_string($version)) {
-            throw new \InvalidArgumentException("Argument 'version' must have type string.");
-        }
         if (!in_array($version, self::SUPPORTED_PROTOCOL_VERSIONS)) {
             throw new \InvalidArgumentException("The protocol version '$version' is not supported.");
         }
@@ -70,12 +67,8 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::hasHeader()
      */
-    public function hasHeader($name): bool
+    public function hasHeader(string $name): bool
     {
-        if (!is_string($name)) {
-            throw new \InvalidArgumentException("Argument 'name' must have type string.");
-        }
-
         foreach ($this->headers as $headerName => $_) {
             if (strcasecmp($name, $headerName) == 0) {
                 return true;
@@ -88,12 +81,8 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::getHeader()
      */
-    public function getHeader($name): array
+    public function getHeader(string $name): array
     {
-        if (!is_string($name)) {
-            throw new \InvalidArgumentException("Argument 'name' must have type string.");
-        }
-
         foreach ($this->headers as $headerName => $headerValues) {
             if (strcasecmp($name, $headerName) == 0) {
                 return $headerValues;
@@ -106,7 +95,7 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::getHeaderLine()
      */
-    public function getHeaderLine($name): string
+    public function getHeaderLine(string $name): string
     {
         return implode(",", $this->getHeader($name));
     }
@@ -114,11 +103,8 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withHeader()
      */
-    public function withHeader($name, $value): static
+    public function withHeader(string $name, $value): static
     {
-        if (!is_string($name)) {
-            throw new \InvalidArgumentException("Argument 'name' must have type string.");
-        }
         if (!Utilities::isStringOrArrayOfStrings($value)) {
             throw new \InvalidArgumentException("Argument 'value' must have type string or string[].");
         }
@@ -136,11 +122,8 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withAddedHeader()
      */
-    public function withAddedHeader($name, $value): static
+    public function withAddedHeader(string $name, $value): static
     {
-        if (!is_string($name)) {
-            throw new \InvalidArgumentException("Argument 'name' must have type string.");
-        }
         if (!Utilities::isStringOrArrayOfStrings($value)) {
             throw new \InvalidArgumentException("Argument 'value' must have type string or string[].");
         }
@@ -161,12 +144,8 @@ class Message implements MessageInterface
     /**
      * @see MessageInterface::withoutHeader()
      */
-    public function withoutHeader($name): static
+    public function withoutHeader(string $name): static
     {
-        if (!is_string($name)) {
-            throw new \InvalidArgumentException("Argument 'name' must have type string.");
-        }
-
         $nameToSplice = $this->getMatchingHeaderNameIfExistsOrDefault($name);
 
         $newMessage = clone $this;
@@ -201,7 +180,7 @@ class Message implements MessageInterface
      * @param string $name The name provided.
      * @return string Either the name of the matching header or the name provided.
      */
-    private function getMatchingHeaderNameIfExistsOrDefault($name)
+    private function getMatchingHeaderNameIfExistsOrDefault(string $name)
     {
         foreach ($this->headers as $headerName => $_) {
             if (strcasecmp($name, $headerName) == 0) {

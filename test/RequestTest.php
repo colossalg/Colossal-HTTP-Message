@@ -55,13 +55,6 @@ final class RequestTest extends TestCase
         $this->assertEquals("http://localhost:8000/users?id=1", $newRequest->getRequestTarget());
     }
 
-    public function testWithRequestTargetThrowsForNonStringRequestTargetArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'requestTarget'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->request->withRequestTarget(1);
-    }
-
     public function testWithRequestTargetThrowsForUnrecognisedForm(): void
     {
         // Test that the method throws when the string argument 'requestTarget' is in unrecognised form
@@ -75,13 +68,6 @@ final class RequestTest extends TestCase
         $newRequest = $this->request->withMethod("POST");
         $this->assertEquals("GET", $this->request->getMethod());
         $this->assertEquals("POST", $newRequest->getMethod());
-    }
-
-    public function testWithMethodThrowsForNonStringMethodArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'method'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->request->withMethod(1); /** @phpstan-ignore-line */
     }
 
     public function testWithMethodThrowsForUnsuportedHttpMethod(): void
@@ -121,12 +107,5 @@ final class RequestTest extends TestCase
             ->withHeader("host", "localhost")
             ->withUri($uriWithHost, true);
         $this->assertEquals(["localhost"], $newRequest->getHeader("host"));
-    }
-
-    public function testWithUriThrowsForNonBoolPreserveHostArgument(): void
-    {
-        // Test that the method throws when we provide it with a non bool value for the argument 'preserveHost'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->request->withUri(new Uri(), 1); /** @phpstan-ignore-line */
     }
 }

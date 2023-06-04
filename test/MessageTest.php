@@ -30,13 +30,6 @@ final class MessageTest extends TestCase
         }
     }
 
-    public function testWithProtocolVersionThrowsForNonStringVersionArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'version'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->message->withProtocolVersion(1); /** @phpstan-ignore-line */
-    }
-
     public function testWithProtocolVersionThrowsWhenGivenNonSupportedVersion(): void
     {
         // Test that the method throws an exception when we try to set a non-supported protocol version
@@ -68,13 +61,6 @@ final class MessageTest extends TestCase
         $this->assertFalse($newMessage->hasHeader("header3"));
     }
 
-    public function testHasHeaderThrowsForNonStringNameArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'name'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->message->hasHeader(1); /** @phpstan-ignore-line */
-    }
-
     public function testGetHeader(): void
     {
         // Test that the method works in some general cases
@@ -84,13 +70,6 @@ final class MessageTest extends TestCase
         $this->assertEquals(["value1"], $newMessage->getHeader("header1"));
         $this->assertEquals(["value2", "value3"], $newMessage->getHeader("header2"));
         $this->assertEquals([], $newMessage->getHeader("header3"));
-    }
-
-    public function testGetHeaderThrowsForNonStringNameArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'name'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->message->getHeader(1); /** @phpstan-ignore-line */
     }
 
     public function testWithHeader(): void
@@ -116,13 +95,6 @@ final class MessageTest extends TestCase
         $newMessage2 = $newMessage->withHeader($headerName2, $headerValue3);
         $this->assertEquals($headerValue2, $newMessage->getHeader($headerName2));
         $this->assertEquals($headerValue3, $newMessage2->getHeader($headerName2));
-    }
-
-    public function testWithHeaderThrowsForNonStringNameArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'name'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->message->withHeader(1, "value"); /** @phpstan-ignore-line */
     }
 
     public function testWithHeaderThrowsForNonStringOrStringArrayValueArgument(): void
@@ -162,13 +134,6 @@ final class MessageTest extends TestCase
         }
     }
 
-    public function testWithAddedHeaderThrowsForNonStringNameArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'name'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->message->withAddedHeader(1, "value"); /** @phpstan-ignore-line */
-    }
-
     public function testWithAddedHeaderThrowsForNonStringOrStringArrayValueArgument(): void
     {
         // Test that the method throws when we provide it with a non string or string[] value for the argument 'value'
@@ -188,13 +153,6 @@ final class MessageTest extends TestCase
         $this->message->withoutHeader("header");
     }
 
-    public function testWithoutHeaderThrowsForNonStringNameArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'name'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->message->withoutHeader(1); /** @phpstan-ignore-line */
-    }
-
     public function testGetHeaderLine(): void
     {
         // Test the general operation of the method
@@ -204,13 +162,6 @@ final class MessageTest extends TestCase
         // Test the edge case where we have no header that is an empty array
         $newMessage = $this->message->withHeader("header", []);
         $this->assertEquals("", $newMessage->getHeaderLine("header"));
-    }
-
-    public function testGetHeaderLineThrowsForNonStringNameArgument(): void
-    {
-        // Test that the method throws when we provide it with a non string value for the argument 'name'
-        $this->expectException(\InvalidArgumentException::class);
-        $this->message->getHeaderLine(1); /** @phpstan-ignore-line */
     }
 
     public function testWithBody(): void

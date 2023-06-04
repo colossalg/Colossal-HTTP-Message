@@ -70,11 +70,8 @@ class Request extends Message implements RequestInterface
     /**
      * @see RequestInterface::withRequestTarget()
      */
-    public function withRequestTarget($requestTarget): static
+    public function withRequestTarget(string $requestTarget): static
     {
-        if (!is_string($requestTarget)) {
-            throw new \InvalidArgumentException("Argument 'requestTarget' must have type string.");
-        }
         if (
             !Rfc7230::IsRequestTargetInOriginForm($requestTarget)       &&
             !Rfc7230::IsRequestTargetInAbsoluteForm($requestTarget)     &&
@@ -104,11 +101,8 @@ class Request extends Message implements RequestInterface
     /**
      * @see RequestInterface::withMethod()
      */
-    public function withMethod($method): static
+    public function withMethod(string $method): static
     {
-        if (!is_string($method)) {
-            throw new \InvalidArgumentException("Argument 'method' must have type string.");
-        }
         if (!in_array($method, self::SUPPORTED_METHODS)) {
             throw new \InvalidArgumentException("The HTTP method '$method' is not supported.");
         }
@@ -130,12 +124,8 @@ class Request extends Message implements RequestInterface
     /**
      * @see RequestInterface::withUri()
      */
-    public function withUri(UriInterface $uri, $preserveHost = false): static
+    public function withUri(UriInterface $uri, bool $preserveHost = false): static
     {
-        if (!is_bool($preserveHost)) {
-            throw new \InvalidArgumentException("Argument 'preserveHost' must have type bool.");
-        }
-
         $newRequest = clone $this;
         $newRequest->uri = $uri;
 
