@@ -65,14 +65,6 @@ class Response extends Message implements ResponseInterface
     }
 
     /**
-     * Copy constructor.
-     */
-    public function __clone()
-    {
-        parent::__clone();
-    }
-
-    /**
      * @see ResponseInterface::getStatusCode()
      */
     public function getStatusCode(): int
