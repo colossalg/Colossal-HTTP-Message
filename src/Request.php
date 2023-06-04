@@ -38,16 +38,6 @@ class Request extends Message implements RequestInterface
     }
 
     /**
-     * Copy constructor.
-     */
-    public function __clone()
-    {
-        parent::__clone();
-
-        $this->uri = clone $this->uri;
-    }
-
-    /**
      * @see RequestInterface::getRequestTarget()
      */
     public function getRequestTarget(): string

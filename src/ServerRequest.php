@@ -27,14 +27,6 @@ class ServerRequest extends Request implements ServerRequestInterface
     }
 
     /**
-     * Copy constructor.
-     */
-    public function __clone()
-    {
-        parent::__clone();
-    }
-
-    /**
      * @see ServerRequestInterface::getServerParams()
      */
     public function getServerParams(): array

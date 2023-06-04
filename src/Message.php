@@ -26,14 +26,6 @@ class Message implements MessageInterface
     }
 
     /**
-     * Copy constructor.
-     */
-    public function __clone()
-    {
-        $this->body = clone $this->body;
-    }
-
-    /**
      * @see MessageInterface::getProtocolVersion()
      */
     public function getProtocolVersion(): string
